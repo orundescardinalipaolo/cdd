@@ -95,7 +95,23 @@ cbind(A, c(1,1))
 rbind(C, c(10,11,12))
 
 # i) Calcule, si es posible: AC, -3B.
+#Si hago elemento por elemento
+A * C
+#Error en A * C: arreglos de dimensón no compatibles
 
+#En cambio si hago el producto matricial
+A %*% C
+# Resultado: [,1] [,2] [,3]
+#     [1,]    6    0   -6
+#     [2,]   24   18   12
+
+#acá tengo dudas como resolverlo
+
+#Producto -3B
+-3 * B
+#Resultado: [,1] [,2]
+#     [1,]   -6  -18
+#     [2,]  -12  -24
 
 # j) Divida cada elemento de la matriz B por 10.
 B / 10

@@ -171,3 +171,38 @@ help(package = "multcomp")
 # probs: paquete vinculado a probabilidad, útil para trabajar con distribuciones y simulaciones.
 # ISLR: colección de datasets para acompañar el libro An Introduction to Statistical Learning with Applications in R.
 # multcomp: paquete destinado a comparaciones múltiples en modelos estadísticos.
+
+
+#Ejercicio 4. Trabajo con un dataset: case0102
+
+#a) Utilice los comandos y comente lo que realiza cada uno library(Sleuth3), data(case0102), View(case0102) head(case0102), str(case0102).
+
+install.packages("Sleuth3")
+library(Sleuth3)
+help(package = "Sleuth3")
+
+data(case0102) 
+#Cuando ejecuto este entiendo que lo inicializa o carga para en memoria para ser usado, la consolta no me devolvió nada pero si vi en el Envirnment que cargo case0102 <Promise>
+
+View(case0102) 
+#Cuando ejecture este me abrió una pestaña con una planilla de dos columnas (salary, sex) con 93 registros
+
+head(case0102)
+# Me mostró las primeras 6 filas del dataset
+# > head(case0102)
+# Salary    Sex
+# 1   3900 Female
+# 2   4020 Female
+# 3   4290 Female
+# 4   4380 Female
+# 5   4380 Female
+# 6   4380 Female
+
+
+str(case0102)
+# En la salida por consola me mostró
+# > str(case0102)
+# 'data.frame':	93 obs. of  2 variables:
+#   $ Salary: int  3900 4020 4290 4380 4380 4380 4380 4380 4440 4500 ...
+# $ Sex   : Factor w/ 2 levels "Female","Male": 1 1 1 1 1 1 1 1 1 1 ...
+# Me mostró la estructura del dataset: tipo de objeto: cantidad de observaciones de variables y tipo de cada variable (int a salary y Factor a Sex, con dos niveles).

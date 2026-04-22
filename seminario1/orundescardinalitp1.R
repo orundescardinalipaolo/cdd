@@ -8,7 +8,7 @@
 # Seminario 1. Técnicas de Análisis en Ciencias de Datos
 # Trabajo Práactico 1. Introducción a RStudio. Operaciones con Vectores, Matrices y Datasets
 
-# Ejercicico 1. Vectores y Matrices
+# Ejercicio 1. Vectores y Matrices
 # a) Construya un vector cuyas componentes sean: -1, 1, 2, 6, 10, 15, 21, 25, 100.
 
 vectorA <- c(-1, 1, 2, 6, 10, 15, 21, 25, 100)
@@ -53,7 +53,7 @@ print(B)
 print(C)
 print(E)
 
-# Ejercicico 2. Operaciones con Vectores y Matrices Indique:
+# Ejercicio 2. Operaciones con Vectores y Matrices Indique:
 
 # a) Las dimensiones de la matriz A.
 #Error: objeto 'A' no encontrado si da ese error es porque hay que ejecutar la linea 36 (CONTROL + ENTER) y luego si ejecutar dim(A)
@@ -145,3 +145,22 @@ det(C)
 # [2,]    0    0    0    0
 # [3,]    0    0    0    0
 # [4,]    0    0    0    0
+
+
+# Ejercicio 3. Inspección de paquetes
+
+#para instalar en una única línea se puede hacer así: install.packages(c("car", "mosaic", "probs", "ISLR", "multcomp")) o bien instalar paquete por paquete install.packages("car") ...
+
+install.packages(c("car", "mosaic", "probs", "ISLR", "multcomp"))
+
+library(car)
+library(mosaic)
+library(probs)
+library(ISLR)
+library(multcomp)
+
+help(package = "car")
+help(package = "mosaic")
+help(package = "probs")
+help(package = "ISLR")
+help(package = "multcomp")

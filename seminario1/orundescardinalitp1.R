@@ -164,3 +164,10 @@ help(package = "mosaic")
 help(package = "probs")
 help(package = "ISLR")
 help(package = "multcomp")
+
+#Busqué para que sirve cada uno y en resumen es:
+# car: paquete orientado a regresión aplicada y análisis estadístico, con funciones para diagnóstico de modelos.
+# mosaic: paquete pensado para facilitar el aprendizaje y uso de estadística, cálculo y modelado de manera integrada.
+# probs: paquete vinculado a probabilidad, útil para trabajar con distribuciones y simulaciones.
+# ISLR: colección de datasets para acompañar el libro An Introduction to Statistical Learning with Applications in R.
+# multcomp: paquete destinado a comparaciones múltiples en modelos estadísticos.

@@ -206,3 +206,84 @@ str(case0102)
 #   $ Salary: int  3900 4020 4290 4380 4380 4380 4380 4380 4440 4500 ...
 # $ Sex   : Factor w/ 2 levels "Female","Male": 1 1 1 1 1 1 1 1 1 1 ...
 # Me mostró la estructura del dataset: tipo de objeto: cantidad de observaciones de variables y tipo de cada variable (int a salary y Factor a Sex, con dos niveles).
+
+#b) ¿Cuáles son las variables que forman esta base de datos?
+names(case0102)
+#Respuesta: [1] "Salary" "Sex" 
+
+#c) Visualice el encabezado de los datos
+head(case0102)
+
+# d) Visualice la descripción de los datos
+# help(case0102) o también ?case0102
+?case0102
+#Me mostró en la pestaña Help la descripción de los datos
+
+#e) Determine la dimensión de la matriz de datos
+#se puede ejecutar también nrow(case0102) ncol(case0102)
+dim(case0102)
+#Respuesta: [1] 93  2 (93 filas x 2 columnas)
+
+#f) ¿Cuáles son las variables cualitativas de la base de datos? ¿Qué categorías tienen?
+str(case0102)
+
+# 'data.frame':	93 obs. of  2 variables:
+#   $ Salary: int  3900 4020 4290 4380 4380 4380 4380 4380 4440 4500 ...
+# $ Sex   : Factor w/ 2 levels "Female","Male": 1 1 1 1 1 1 1 1 1 1 ...
+#puedo usar las variabbles como case0102$Sex o Sex
+
+#g) La variable Salary, ¿tiene valores faltantes?
+#Para verificar is.na(case0102$Salary)
+#Para saber cuántos faltantes hay sum(is.na(case0102$Salary)) o any(is.na(case0102$Salary))
+
+is.na(case0102$Salary)
+# [1] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
+# [14] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
+# [27] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
+# [40] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
+# [53] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
+# [66] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
+# [79] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
+# [92] FALSE FALSE
+
+sum(is.na(case0102$Salary))
+#[1] 0 Si el resultado es 0, entonces no tiene valores faltantes.
+
+any(is.na(case0102$Salary))
+#[1] FALSE (TRUE sí hay faltantes, FALSE no hay faltantes)
+
+#h) Obtenga el salario medio por sexo
+# Salary ~ Sex se lee como calcular Salary agrupando por Sex de la base (data = case0102) 
+# mean(...) calcula la media del salario para cada categoría de sexo.
+mean(Salary ~ Sex, data = case0102)
+#Me retornó: 
+# Aviso:
+# In mean.default(Salary ~ Sex, data = case0102) :
+#   argument is not numeric or logical: returning NA
+
+#Investigo el aviso y es porque me faltó cargar la librería mosaic
+library(mosaic)
+mean(Salary ~ Sex, data = case0102)
+#Resultado:  
+#Devuelve el salario promedio de mujeres y varones.
+# Female     Male 
+# 5138.852 5956.875 
+
+#i) Cree un vector que almacene el salario (Salary) para los varones
+salario_varones <- case0102$Salary[case0102$Sex == "Male"]
+salario_varones
+#Resultado:
+# [1] 4620 5040 5100 5100 5220 5400 5400 5400 5400 5400 5700 6000 6000 6000 6000 6000
+# [17] 6000 6000 6000 6000 6000 6000 6000 6000 6300 6600 6600 6600 6840 6900 6900 8100
+
+
+#j) Cree un vector que almacene el sexo (Sex) para aquellos empleados con Salary mayor a 6000
+sexo_mayor_6000 <- case0102$Sex[case0102$Salary > 6000]
+sexo_mayor_6000
+#[1] Female Female Female Male   Male   Male   Male   Male   Male   Male   Male 
+#Levels: Female Male //NO ENTENDÍ ÉSTA SALIDA  
+
+# k) Visualice la variable Salary para aquellos empleados correspondientes a los índices 2, 10, 26 y 55
+salarios_indices <- case0102$Salary[c(2, 10, 26, 55)]
+salarios_indices
+#Respuesta: [1] 4020 4500 5100 5700

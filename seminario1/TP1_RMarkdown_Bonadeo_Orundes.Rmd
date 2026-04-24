@@ -8,7 +8,6 @@ output:
 fontsize: 11pt
 lang: es
 header-includes:
-  - \usepackage[spanish]{babel}
   - \usepackage[utf8]{inputenc}
   - \usepackage[T1]{fontenc}
 ---

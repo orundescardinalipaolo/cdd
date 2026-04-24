@@ -1,12 +1,12 @@
 # Maestría en Ciencia de Datos - FCyT - UADER
-# ORUNDES CARDINALI PAOLO
+# Seminario 1. Técnicas de Análisis en Ciencias de Datos
+# Trabajo Práactico 1. Introducción a RStudio. Operaciones con Vectores, Matrices y Datasets
+
+
+# PAMELA BONADEO - ORUNDES CARDINALI PAOLO
 # COMENTAR BLOQUES DE CÓDIGO CONTROL+SHITF+C
 # AUTOAJUSTAR TEXTO (QUITAR BARRA HORIZONTAL) TOOLS / GLOBAL OPTIONS / CODE / DISPLAY / SOFT-WRAP SOURCE FILES
 #CODIGO EN REPO https://github.com/orundescardinalipaolo/cdd
-
-
-# Seminario 1. Técnicas de Análisis en Ciencias de Datos
-# Trabajo Práactico 1. Introducción a RStudio. Operaciones con Vectores, Matrices y Datasets
 
 # Ejercicio 1. Vectores y Matrices
 # a) Construya un vector cuyas componentes sean: -1, 1, 2, 6, 10, 15, 21, 25, 100.

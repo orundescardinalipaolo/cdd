@@ -1,0 +1,356 @@
+---
+title: "Trabajo Práctico 1. Introducción a RStudio. Operaciones con Vectores, Matrices y Datasets"
+author: "Lic. Pamela Bonadeo - Lic. N. Paolo Orundés Cardinali"
+date: "Abril de 2026"
+output:
+  pdf_document:
+    toc: false
+fontsize: 11pt
+lang: es
+header-includes:
+  - \usepackage[spanish]{babel}
+  - \usepackage[utf8]{inputenc}
+  - \usepackage[T1]{fontenc}
+---
+
+**Maestría en Ciencia de Datos - FCyT - UADER**  
+**Seminario 1. Técnicas de Análisis en Ciencias de Datos**
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+# Ejercicio 1. Vectores y matrices
+
+## a) Construya un vector cuyas componentes sean: -1, 1, 2, 6, 10, 15, 21, 25, 100
+
+```{r}
+vectorA <- c(-1, 1, 2, 6, 10, 15, 21, 25, 100)
+vectorA
+```
+
+## b) Construya un vector cuyas componentes sean los números enteros entre 0 y 50
+
+```{r}
+vectorB <- 0:50
+vectorB
+```
+
+## c) Construya un vector cuyas componentes sean números reales entre 0 y 1 utilizando un incremento de 0,01. ¿Qué longitud tiene este vector?
+
+```{r}
+vectorC <- seq(0, 1, by = 0.01)
+vectorC
+length(vectorC)
+```
+
+La longitud del vector es 101, ya que se incluyen tanto el 0 como el 1.
+
+## d) Construya un vector que repita 100 veces el número 2
+
+```{r}
+vectorD <- rep(2, 100)
+vectorD
+```
+
+## e) Construya un vector categórico cuyas componentes sean: Lunes, Martes, Miércoles, Jueves, Viernes
+
+```{r}
+vectorE <- factor(c("Lunes", "Martes", "Miercoles", "Jueves", "Viernes"))
+vectorE
+```
+
+## f) Construya las matrices A, B, C y E
+
+```{r}
+A <- matrix(c(2, 4, 6,
+              8, 10, 12),
+            nrow = 2, byrow = TRUE)
+
+B <- matrix(c(2, 6,
+              4, 8),
+            nrow = 2, byrow = TRUE)
+
+C <- matrix(c(1, 2, 3,
+              4, 5, 6,
+              -2, -4, -6),
+            nrow = 3, byrow = TRUE)
+
+E <- matrix(0, nrow = 4, ncol = 5)
+
+A
+B
+C
+E
+```
+
+# Ejercicio 2. Operaciones con vectores y matrices
+
+## a) Las dimensiones de la matriz A
+
+```{r}
+dim(A)
+```
+
+La matriz A tiene 2 filas y 3 columnas.
+
+## b) La componente c2,2 de la matriz C
+
+```{r}
+C[2, 2]
+```
+
+La componente ubicada en la fila 2 y columna 2 de la matriz C es 5.
+
+## c) La fila 2 de la matriz A
+
+```{r}
+A[2, ]
+```
+
+## d) La columna 3 de la matriz C
+
+```{r}
+C[, 3]
+```
+
+## e) La matriz que resulta de quitar la fila 2 de la matriz C
+
+```{r}
+C[-2, ]
+```
+
+## f) La matriz que resulta de quitar la columna 3 de la matriz A
+
+```{r}
+A[, -3]
+```
+
+## g) La matriz que resulta de agregar la columna $(1,1)^t$ a la matriz A
+
+```{r}
+cbind(A, c(1, 1))
+```
+
+## h) La matriz que resulta de agregar la fila (10, 11, 12) a la matriz C
+
+```{r}
+rbind(C, c(10, 11, 12))
+```
+
+## i) Calcule, si es posible: AC, -3B
+
+Si se intenta multiplicar elemento a elemento, la operación no es posible porque las dimensiones de A y C no son compatibles para ese tipo de producto.
+
+```{r, error=TRUE}
+A * C
+```
+
+En cambio, el producto matricial sí existe, porque A es una matriz de dimensión 2x3 y C es una matriz de dimensión 3x3. La condición para el producto matricial es que el número de columnas de la primera matriz coincida con el número de filas de la segunda.
+
+```{r}
+A %*% C
+```
+
+Además:
+
+```{r}
+-3 * B
+```
+
+## j) Divida cada elemento de la matriz B por 10
+
+```{r}
+B / 10
+```
+
+## k) La inversa de la matriz B, la inversa de la matriz C y la inversa de la matriz $EE^t$, en caso de que existan
+
+La matriz B sí es invertible.
+
+```{r}
+solve(B)
+```
+
+Para la matriz C, la inversa no existe porque su determinante es 0. Por lo tanto, la matriz es singular.
+
+```{r}
+det(C)
+```
+
+```{r, error=TRUE}
+solve(C)
+```
+
+Ahora se calcula $EE^t$:
+
+```{r}
+EEt <- E %*% t(E)
+EEt
+```
+
+Como E es una matriz nula, el producto $EE^t$ también es una matriz nula, por lo que no tiene inversa.
+
+```{r, error=TRUE}
+solve(EEt)
+```
+
+# Ejercicio 3. Inspección de paquetes
+
+Para instalar los paquetes se puede utilizar la siguiente instrucción. Se deja en un chunk no evaluable para evitar reinstalarlos cada vez que se compile el documento.
+
+```{r, eval=FALSE}
+install.packages(c("car", "mosaic", "probs", "ISLR", "multcomp"))
+```
+
+Luego, se cargan los paquetes y se consulta su ayuda general.
+
+```{r, eval=FALSE}
+library(car)
+library(mosaic)
+library(probs)
+library(ISLR)
+library(multcomp)
+
+help(package = "car")
+help(package = "mosaic")
+help(package = "probs")
+help(package = "ISLR")
+help(package = "multcomp")
+```
+
+A partir de la documentación consultada, puede resumirse lo siguiente:
+
+- **car**: paquete orientado a regresión aplicada y análisis estadístico, con funciones útiles para diagnóstico de modelos.
+- **mosaic**: paquete pensado para facilitar el aprendizaje y uso de estadística, cálculo y modelado de manera integrada.
+- **probs**: paquete vinculado a probabilidad, útil para trabajar con distribuciones y simulaciones.
+- **ISLR**: colección de datasets diseñada para acompañar el libro *An Introduction to Statistical Learning with Applications in R*.
+- **multcomp**: paquete destinado a comparaciones múltiples en modelos estadísticos.
+
+# Ejercicio 4. Trabajo con un dataset: case0102
+
+## a) Utilice los comandos y comente lo que realiza cada uno: `library(Sleuth3)`, `data(case0102)`, `View(case0102)`, `head(case0102)`, `str(case0102)`
+
+Primero se instala y carga el paquete correspondiente. La instalación se deja sin evaluar para evitar reinstalaciones innecesarias al compilar.
+
+```{r, eval=FALSE}
+install.packages("Sleuth3")
+```
+
+```{r}
+library(Sleuth3)
+help(package = "Sleuth3")
+```
+
+```{r}
+data(case0102)
+```
+
+El comando `data(case0102)` carga el dataset en memoria para poder utilizarlo en el análisis.
+
+El comando `View(case0102)` abre una pestaña en RStudio con los datos en formato de planilla. No se incluye como chunk porque su efecto es interactivo y no aporta a la compilación del PDF.
+
+```{r}
+head(case0102)
+```
+
+El comando `head(case0102)` muestra las primeras filas del dataset.
+
+```{r}
+str(case0102)
+```
+
+El comando `str(case0102)` muestra la estructura del objeto, indicando tipo de dato, cantidad de observaciones, variables y clases de cada variable.
+
+## b) ¿Cuáles son las variables que forman esta base de datos?
+
+```{r}
+names(case0102)
+```
+
+La base de datos está formada por las variables `Salary` y `Sex`.
+
+## c) Visualice el encabezado de los datos
+
+```{r}
+head(case0102)
+```
+
+## d) Visualice la descripción de los datos
+
+La descripción puede consultarse con:
+
+```{r, eval=FALSE}
+?case0102
+```
+
+En la pestaña de ayuda se muestra la descripción general del conjunto de datos.
+
+## e) Determine la dimensión de la matriz de datos
+
+```{r}
+dim(case0102)
+```
+
+La dimensión del dataset es de 93 filas por 2 columnas.
+
+## f) ¿Cuáles son las variables cualitativas de la base de datos? ¿Qué categorías tienen?
+
+```{r}
+str(case0102)
+levels(case0102$Sex)
+```
+
+La variable cualitativa es `Sex`, y sus categorías son `Female` y `Male`.
+
+## g) La variable Salary, ¿tiene valores faltantes?
+
+```{r}
+sum(is.na(case0102$Salary))
+any(is.na(case0102$Salary))
+```
+
+Como la suma de valores faltantes es 0 y `any(is.na(case0102$Salary))` devuelve `FALSE`, puede concluirse que la variable `Salary` no presenta valores faltantes.
+
+## h) Obtenga el salario medio por sexo. Combine la librería `mosaic` con la línea de código `mean(Salary ~ Sex, data = case0102)`. Analice la salida y el código
+
+Primero se carga la librería `mosaic`.
+
+```{r}
+library(mosaic)
+mean(Salary ~ Sex, data = case0102)
+```
+
+La expresión `Salary ~ Sex` indica que se desea calcular el salario agrupando por sexo. Luego, `data = case0102` especifica que ambas variables pertenecen a ese dataset. La salida muestra el salario medio de mujeres y varones, permitiendo comparar ambos grupos.
+
+## i) Cree un vector que almacene el salario (`Salary`) para los varones
+
+```{r}
+salario_varones <- case0102$Salary[case0102$Sex == "Male"]
+salario_varones
+```
+
+## j) Cree un vector que almacene el sexo (`Sex`) para aquellos empleados con `Salary` mayor a 6000
+
+```{r}
+sexo_mayor_6000 <- case0102$Sex[case0102$Salary > 6000]
+sexo_mayor_6000
+```
+
+La salida es correcta: devuelve los valores de la variable `Sex` correspondientes únicamente a las observaciones cuyo salario es mayor a 6000. Como `Sex` es un factor, R además conserva e informa sus niveles posibles (`Female` y `Male`).
+
+## k) Visualice la variable `Salary` para aquellos empleados correspondientes a los índices 2, 10, 26 y 55
+
+```{r}
+salarios_indices <- case0102$Salary[c(2, 10, 26, 55)]
+salarios_indices
+```
+
+# Observación final
+
+Para compilar este archivo a PDF desde RStudio, debe utilizarse la opción **Knit**. Si RStudio informa que falta LaTeX, puede instalarse con los siguientes comandos en la consola:
+
+```{r, eval=FALSE}
+install.packages("tinytex")
+tinytex::install_tinytex()
+```

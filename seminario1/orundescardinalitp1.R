@@ -105,7 +105,7 @@ A %*% C
 #     [1,]    6    0   -6
 #     [2,]   24   18   12
 
-#acá tengo dudas como resolverlo
+#acá tenemos dudas como resolverlo
 
 #Producto -3B
 -3 * B
@@ -135,7 +135,7 @@ EEt
 # Error en solve.default(C): 
 #   Lapack routine dgesv: system is exactly singular: U[3,3] = 0
 det(C)
-#[1] 0 La determinante es = 0, entiendo que ese es el error
+#[1] 0 La determinante es = 0, entendemos que ese es el error
 
 
 # > EEt <- E %*% t(E)
@@ -165,7 +165,7 @@ help(package = "probs")
 help(package = "ISLR")
 help(package = "multcomp")
 
-#Busqué para que sirve cada uno y en resumen es:
+#Buscamos para que sirve cada uno y en resumen es:
 # car: paquete orientado a regresión aplicada y análisis estadístico, con funciones para diagnóstico de modelos.
 # mosaic: paquete pensado para facilitar el aprendizaje y uso de estadística, cálculo y modelado de manera integrada.
 # probs: paquete vinculado a probabilidad, útil para trabajar con distribuciones y simulaciones.
@@ -182,13 +182,13 @@ library(Sleuth3)
 help(package = "Sleuth3")
 
 data(case0102) 
-#Cuando ejecuto este entiendo que lo inicializa o carga para en memoria para ser usado, la consolta no me devolvió nada pero si vi en el Envirnment que cargo case0102 <Promise>
+#Cuando ejecutamos este comando entendemos que lo inicializa o carga al dataset  en memoria para ser usado, la consolta no devolvió nada pero si vimos en el Envirnment que cargo case0102 <Promise>
 
 View(case0102) 
-#Cuando ejecture este me abrió una pestaña con una planilla de dos columnas (salary, sex) con 93 registros
+#Cuando ejecutamos este comando, se abrió una pestaña con una planilla de dos columnas (salary, sex) con 93 registros
 
 head(case0102)
-# Me mostró las primeras 6 filas del dataset
+# Nos mostró las primeras 6 filas del dataset
 # > head(case0102)
 # Salary    Sex
 # 1   3900 Female
@@ -200,12 +200,12 @@ head(case0102)
 
 
 str(case0102)
-# En la salida por consola me mostró
+# En la salida por consola nos mostró
 # > str(case0102)
 # 'data.frame':	93 obs. of  2 variables:
 #   $ Salary: int  3900 4020 4290 4380 4380 4380 4380 4380 4440 4500 ...
 # $ Sex   : Factor w/ 2 levels "Female","Male": 1 1 1 1 1 1 1 1 1 1 ...
-# Me mostró la estructura del dataset: tipo de objeto: cantidad de observaciones de variables y tipo de cada variable (int a salary y Factor a Sex, con dos niveles).
+# Nos mostró la estructura del dataset: tipo de objeto: cantidad de observaciones de variables y tipo de cada variable (int a salary y Factor a Sex, con dos niveles).
 
 #b) ¿Cuáles son las variables que forman esta base de datos?
 names(case0102)
@@ -217,7 +217,7 @@ head(case0102)
 # d) Visualice la descripción de los datos
 # help(case0102) o también ?case0102
 ?case0102
-#Me mostró en la pestaña Help la descripción de los datos
+#NOs mostró en la pestaña Help la descripción de los datos
 
 #e) Determine la dimensión de la matriz de datos
 #se puede ejecutar también nrow(case0102) ncol(case0102)
@@ -256,12 +256,12 @@ any(is.na(case0102$Salary))
 # Salary ~ Sex se lee como calcular Salary agrupando por Sex de la base (data = case0102) 
 # mean(...) calcula la media del salario para cada categoría de sexo.
 mean(Salary ~ Sex, data = case0102)
-#Me retornó: 
+#Nos retornó: 
 # Aviso:
 # In mean.default(Salary ~ Sex, data = case0102) :
 #   argument is not numeric or logical: returning NA
 
-#Investigo el aviso y es porque me faltó cargar la librería mosaic
+#Investigamos el aviso y es porque nos faltó cargar la librería mosaic
 library(mosaic)
 mean(Salary ~ Sex, data = case0102)
 #Resultado:  
@@ -281,7 +281,7 @@ salario_varones
 sexo_mayor_6000 <- case0102$Sex[case0102$Salary > 6000]
 sexo_mayor_6000
 #[1] Female Female Female Male   Male   Male   Male   Male   Male   Male   Male 
-#Levels: Female Male //NO ENTENDÍ ÉSTA SALIDA  
+#Levels: Female Male //NO ENTENDIMOS ÉSTA SALIDA  
 
 # k) Visualice la variable Salary para aquellos empleados correspondientes a los índices 2, 10, 26 y 55
 salarios_indices <- case0102$Salary[c(2, 10, 26, 55)]

@@ -470,7 +470,6 @@ if (requireNamespace("car", quietly = TRUE)) {
 install.packages("Sleuth3")
 library(Sleuth3)
 help(package = "Sleuth3")
-
 data(case0102) 
 View(case0102) 
 
@@ -485,3 +484,4 @@ salario_hombres <- case0102 %>%   filter(Sex == "Male")
 View(salario_mujeres)
 salario_hombres
 
+var.test(Salary ~ Sex, data = case0102)

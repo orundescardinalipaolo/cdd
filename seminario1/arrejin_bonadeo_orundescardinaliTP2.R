@@ -13,7 +13,10 @@
 # a) Ejecute comandos para visualizar su base de datos y las variables: attach(datos), View(datos), head(datos), str(datos).
 
   # Cargar la base de datos
-  datos <- read.table("seminario1/Student0405.txt", header = TRUE)
+  # datos <- read.table("seminario1/Student0405.txt", header = TRUE)
+  datos <- read.delim("seminario1/Student0405.txt", sep="\t", header = TRUE)
+  #View(datos)
+  
 
   # Nos muestra el siguiente error: 
   # Error en scan(file = file, what = what, sep = sep, quote = quote, dec = dec, : line 98 did not have 7 elements

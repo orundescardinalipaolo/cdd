@@ -3,7 +3,7 @@
 # Trabajo Práactico 2. Estimación de parámetros. Correlaciones entre variables. Gráficos. Pruebas de Hipóotesis.
 
 
-# MARTIN ARREJIN - PAMELA BONADEO - ORUNDES CARDINALI PAOLO
+# MARTIN ARREJIN - PAMELA BONADEO - SANTIAGO GRINÓVERO - PAOLO ORUNDES CARDINALI
 #CODIGO EN REPO https://github.com/orundescardinalipaolo/cdd
 
 # Trabajando con una base de datos.
@@ -14,16 +14,17 @@
 
   # Cargar la base de datos
   # datos <- read.table("seminario1/Student0405.txt", header = TRUE)
-  datos <- read.delim("seminario1/Student0405.txt", sep="\t", header = TRUE)
+  
   #View(datos)
   
-
   # Nos muestra el siguiente error: 
   # Error en scan(file = file, what = what, sep = sep, quote = quote, dec = dec, : line 98 did not have 7 elements
 
   #¿solucion provisoria? ¿O hay que revisar la fuente?
-  datos <- read.table("seminario1/Student0405.txt", header = TRUE, fill = TRUE, strip.white = TRUE)
+  #datos <- read.table("seminario1/Student0405.txt", header = TRUE, fill = TRUE, strip.white = TRUE)
 
+  #solución definitiva usar sep="\t" para separar por tabulaciones
+  datos <- read.delim("seminario1/Student0405.txt", sep="\t", header = TRUE)
 
   #adjunta la base de datos
   attach(datos)
@@ -52,11 +53,7 @@
   # 4 Female 3.77      Not         0 Middle         0        4
   # 5   Male 3.28      Not         0 Middle         8       12
   # 6 Female 2.80   Fairly         0 Middle         2       20
-  # 
   
-  
-  
-
   
 # b) Identifique tamaño muestral y cantidad de variables.
   

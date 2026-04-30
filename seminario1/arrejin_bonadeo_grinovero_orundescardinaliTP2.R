@@ -21,10 +21,10 @@
   # Error en scan(file = file, what = what, sep = sep, quote = quote, dec = dec, : line 98 did not have 7 elements
 
   #¿solucion provisoria? ¿O hay que revisar la fuente?
-  #datos <- read.table("seminario1/Student0405.txt", header = TRUE, fill = TRUE, strip.white = TRUE)
+  #datos <- read.table("Student0405.txt", header = TRUE, fill = TRUE, strip.white = TRUE)
 
   #solución definitiva usar sep="\t" para separar por tabulaciones
-  datos <- read.delim("seminario1/Student0405.txt", sep="\t", header = TRUE)
+  datos <- read.delim("Student0405.txt", sep="\t", header = TRUE)
 
   #adjunta la base de datos
   attach(datos)
@@ -77,29 +77,31 @@
   # >   str(datos)
   # 'data.frame':	690 obs. of  7 variables:
   #   $ Sex      : chr  "Female" "Male" "Female" "Female" ...
-  # $ GPA      : chr  "3.70" "3.20" "3.01" "3.77" ...
+  # $ GPA      : num  3.7 3.2 3.01 3.77 3.28 2.8 2.5 3.11 3.15 3.44 ...
   # $ ReligImp : chr  "Fairly" "Fairly" "Fairly" "Not" ...
-  # $ MissClass: chr  "1" "3" "0" "0" ...
+  # $ MissClass: int  1 3 0 0 0 0 3 0 2 0 ...
   # $ Seat     : chr  "Back" "Front" "Middle" "Middle" ...
   # $ PartyDays: int  5 3 8 0 8 2 1 2 15 1 ...
   # $ StudyHrs : int  3 30 16 4 12 20 4 15 7 40 ...
-  # >   summary(datos)
-  # Sex                GPA              ReligImp        
-  # Length:690         Length:690         Length:690        
-  # Class :character   Class :character   Class :character  
-  # Mode  :character   Mode  :character   Mode  :character  
-  # 
-  
+
    
-  # 
-  # MissClass             Seat             PartyDays         StudyHrs    
-  # Length:690         Length:690         Min.   : 0.000   Min.   : 0.00  
-  # Class :character   Class :character   1st Qu.: 3.000   1st Qu.: 6.00  
-  # Mode  :character   Mode  :character   Median : 7.000   Median :10.00  
-  # Mean   : 7.571   Mean   :13.17  
+  # >   summary(datos)
+  # Sex                 GPA          ReligImp           MissClass     
+  # Length:690         Min.   :1.500   Length:690         Min.   :0.0000  
+  # Class :character   1st Qu.:2.930   Class :character   1st Qu.:0.0000  
+  # Mode  :character   Median :3.200   Mode  :character   Median :1.0000  
+  # Mean   :3.179                      Mean   :0.9086  
+  # 3rd Qu.:3.515                      3rd Qu.:1.0000  
+  # Max.   :4.000                      Max.   :6.0000  
+  # NA's   :3                          NA's   :1       
+  # Seat             PartyDays         StudyHrs    
+  # Length:690         Min.   : 0.000   Min.   : 0.00  
+  # Class :character   1st Qu.: 3.000   1st Qu.: 6.25  
+  # Mode  :character   Median : 7.000   Median :10.00  
+  # Mean   : 7.501   Mean   :13.16  
   # 3rd Qu.:11.000   3rd Qu.:16.00  
   # Max.   :31.000   Max.   :70.00  
-  # NA's   :9  
+  # NA's   :4 
   
   #Convertir en tabla para el Rmd:
   # Variable    | Descripción                | Tipo                                                            |
@@ -125,18 +127,56 @@
   
   table(datos$Seat)
   #salida:
-  # 0      1      2      4   Back  Front Middle 
-  # 2      1      1      1    134    149    402 
+  # Back  Front Middle 
+  # 1    134    151    404 
   
   table(datos$ReligImp)
-  # 0      1      2 Fairly    Not   Very 
-  # 1      1      1    319    221    147 
+  # Fairly    Not   Very 
+  # 319    222    149 
 
-  #acá preguntar en la clase de consulta por los 0, 1 y 2 que tal vez al estar "dañada" la bd (ejercicio a), está mal intepretando los valores y por eso trae 0, 1 y 2 cuando no debería...
-  
+  #acá preguntar en la clase de consulta por los 0, 1 y 2 que tal vez al estar "dañada" la bd (ejercicio a), está mal intepretando los valores y por eso trae 0, 1 y 2 cuando no debería... (Resuelto en la clase de consulta con Santiago Diaz el 29 de abril de 2026)
   
      
 #   d) Obtenga un resumen numérico para GPA que contenga: mínimo, máximo, Q1, Q3, mediana, media, desvío estándar y varianza. Además, realice dos gráficos distintos que le permitan describir la distribución de esta variable. ¿Qué puede decir acerca de su distribución?
+  
+  resumen_GPA <- data.frame(
+    Minimo = min(datos$GPA, na.rm = TRUE),
+    Q1 = quantile(datos$GPA, 0.25, na.rm = TRUE),
+    Mediana = median(datos$GPA, na.rm = TRUE),
+    Media = mean(datos$GPA, na.rm = TRUE),
+    Q3 = quantile(datos$GPA, 0.75, na.rm = TRUE),
+    Maximo = max(datos$GPA, na.rm = TRUE),
+    Desvio_Estandar = sd(datos$GPA, na.rm = TRUE),
+    Varianza = var(datos$GPA, na.rm = TRUE)
+  )
+  
+  resumen_GPA
+  #Salida:  
+  # Minimo  Q1     Mediana    Media    Q3       Maximo   Desvio_Estandar  Varianza
+  # 25%     1.5     2.93      3.2     3.179214  3.515 4
+  #0.4533599    0.2055352
+  
+
+  #El histograma permite analizar la forma general de la distribución, mientras que el boxplot permite identificar la mediana, la dispersión y la posible existencia de valores atípicos.
+  
+  #Gráfico 1: Histograma
+  hist(datos$GPA,
+       main = "Distribución de GPA",
+       xlab = "GPA (Promedio de calificaciones)",
+       ylab = "Frecuencia",
+       col = "lightblue",
+       border = "white")
+  
+  #En el histograma se observa que la variable GPA presenta valores concentrados alrededor de la zona central hacia la derecha de la distribución más precisamente en el ranzo entre 2.9 y 3.5
+  
+  #Gráfico 2: Boxplot
+  boxplot(datos$GPA,
+          main = "Boxplot de GPA",
+          ylab = "GPA (Promedio de calificaciones)",
+          col = "lightgreen")
+  
+    #En el boxplot de GPA se observa que la mayoría de las calificaciones se concentran entre aproximadamente 2.9 y 3.5 (coincidente con el diagrama anterior), con una mediana cercana a 3.2 (donde está linea negra en el centro del recuadro, esto quiere decir que la mitad está por debajo de ésta línea y la otra mitad por encima). Además, aparecen algunos valores atípicos inferiores, lo que indica que existen pocos estudiantes con GPA bastante más bajo que el resto. En general, los datos se concentran en valores medios-altos.
+  
    
 #   e) Realice un resumen numérico y un gráfico que le permita conjeturar si las mujeres van más a fiestas que los varones. Describa lo que observa.
  

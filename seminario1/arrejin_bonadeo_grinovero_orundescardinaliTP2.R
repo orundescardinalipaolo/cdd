@@ -179,11 +179,238 @@
   
    
 #   e) Realice un resumen numérico y un gráfico que le permita conjeturar si las mujeres van más a fiestas que los varones. Describa lo que observa.
+  
+  aggregate(PartyDays ~ Sex, data = datos, summary)
+  #Salida
+  # Sex PartyDays.Min. PartyDays.1st Qu. PartyDays.Median PartyDays.Mean
+  # 1 Female       0.000000          3.000000         6.500000       7.539267
+  # 2   Male       0.000000          3.000000         7.000000       7.454545
+  # PartyDays.3rd Qu. PartyDays.Max.
+  # 1         12.000000      31.000000
+  # 2         10.000000      31.000000
+  
+  aggregate(PartyDays ~ Sex, data = datos, mean, na.rm = TRUE)
+  #Salida
+  # Sex PartyDays
+  # 1 Female  7.539267
+  # 2   Male  7.454545
+  
+  
+  aggregate(PartyDays ~ Sex, data = datos, median, na.rm = TRUE)
+  #Salida
+  # Sex PartyDays
+  # 1 Female       6.5
+  # 2   Male       7.0
+  
+  aggregate(PartyDays ~ Sex, data = datos, sd, na.rm = TRUE)
+  #Salida
+  # Sex PartyDays
+  # 1 Female  5.458724
+  # 2   Male  5.454689
+  
+  #Gráfico
+  boxplot(PartyDays ~ Sex,
+          data = datos,
+          main = "Días de fiesta por mes según género",
+          xlab = "Género",
+          ylab = "Días de fiesta por mes",
+          names = c("Femenino", "Masculino"),
+          col = c("lightpink", "lightblue"))
+  
+  #otro gráfico
+  promedios_party$Genero <- factor(promedios_party$Sex,
+                                   levels = c("Female", "Male"),
+                                   labels = c("Femenino", "Masculino"))
+  
+  barplot(promedios_party$PartyDays,
+          names.arg = promedios_party$Genero,
+          main = "Promedio de días de fiesta según género",
+          xlab = "Género",
+          ylab = "Promedio de días de fiesta",
+          col = c("lightpink", "lightblue"))
+  # Éste gráfico no muestra diferencias significativas como el anterior
+  
+  # Que observamos: Para analizar si las mujeres van más a fiestas que los varones, se comparó la variable PartyDays según la variable Sex. A partir del resumen numérico y del boxplot, se observa si alguno de los grupos presenta una mediana o media superior. 
+  #Si el grupo correspondiente a mujeres presenta valores centrales más altos, podría decirse que asisten a fiestas con mayor frecuencia. Sin embargo, esta observación es descriptiva y no implica por sí sola una diferencia estadísticamente significativa (se aprecia mucho mejor en el segundo gráfico).
  
+  
+  
 # f) Realice un resumen numérico y un gráfico que le permita conjeturar si las calificaciones GPA dependen de la ubicación de aula del alumno. Describa lo que observa.
  
+  aggregate(GPA ~ Seat, data = datos, summary)
+  #Salida: 
+  # Seat GPA.Min. GPA.1st Qu. GPA.Median GPA.Mean GPA.3rd Qu. GPA.Max.
+  # 1        2.250000    2.250000   2.250000 2.250000    2.250000 2.250000
+  # 2   Back 1.910000    2.805000   3.100000 3.077015    3.400000 4.000000
+  # 3  Front 1.740000    3.000000   3.265000 3.251067    3.600000 4.000000
+  # 4 Middle 1.500000    2.940000   3.205000 3.188781    3.517500 4.000000
+  
+  aggregate(GPA ~ Seat, data = datos, mean, na.rm = TRUE)
+  #Salida: 
+  # Seat      GPA
+  # 1        2.250000
+  # 2   Back 3.077015
+  # 3  Front 3.251067
+  # 4 Middle 3.188781
+  
+  aggregate(GPA ~ Seat, data = datos, median, na.rm = TRUE)
+  #Salida: 
+  # Seat   GPA
+  # 1        2.250
+  # 2   Back 3.100
+  # 3  Front 3.265
+  # 4 Middle 3.205
+  
+  aggregate(GPA ~ Seat, data = datos, sd, na.rm = TRUE)
+  #Salida: 
+  # Seat       GPA
+  # 1               NA
+  # 2   Back 0.4748027
+  # 3  Front 0.4486537
+  # 4 Middle 0.4408886
+  
+  
+  #Aparecen columnas sin etiquetas porque probablemente en el archivo hay valores vacíos, espacios en blanco o datos faltantes mal leídos.
+  
+  #Comprobación: 
+  table(datos$Seat, useNA = "ifany")
+  
+  #Salida
+  # Back  Front Middle 
+  # 1    134    151    404
+  
+  #Para ver las filas problemáticas
+  datos[datos$Seat == "" | is.na(datos$Seat), ]
+  # Sex  GPA ReligImp MissClass Seat PartyDays StudyHrs
+  # 305 Male 2.25     Very         1              4       10
+  
+  unique(datos$Seat)
+  #Limpiamos los espacios en blanco
+  datos$Seat <- trimws(datos$Seat)
+  
+  #Recomprobación: 
+  table(datos$Seat, useNA = "ifany")
+  #sigue fallando... preguntar en clases
+  
+  
+  #Armamos el gráfico con los datos que tenemos
+  boxplot(GPA ~ Seat,
+          data = datos,
+          main = "GPA según ubicación en el aula",
+          xlab = "Ubicación en el aula",
+          ylab = "GPA",
+          col = "lightblue")
+  
+  # Limpiamos posibles espacios en blanco
+  datos$Seat <- trimws(datos$Seat)
+  
+  # Convertimos categorías vacías en NA
+  datos$Seat[datos$Seat == ""] <- NA
+  
+  # Verificamos la tabla
+  table(datos$Seat, useNA = "ifany")
+  
+  datos_seat <- subset(datos, !is.na(Seat))
+  
+  aggregate(GPA ~ Seat, data = datos_seat, summary)
+  aggregate(GPA ~ Seat, data = datos_seat, mean, na.rm = TRUE)
+  aggregate(GPA ~ Seat, data = datos_seat, sd, na.rm = TRUE)
+  
+  boxplot(GPA ~ Seat,
+          data = datos_seat,
+          main = "GPA según ubicación en el aula",
+          xlab = "Ubicación en el aula",
+          ylab = "GPA",
+          names = c("Al fondo", "Al frente", "En el medio"),
+          col = "lightblue")
+  
+  #Finalmente este gráfico funciona bien excluyendo el NA. Al analizar la variable Seat, se detectó un registro sin categoría asignada. Dado que no es posible identificar la ubicación del estudiante en el aula, dicho valor se consideró como dato faltante (NA) y se excluyó del análisis comparativo de GPA según ubicación. Esta decisión evita interpretar erróneamente el valor vacío como una categoría válida.
+  
+  #Los puntos inferiores observados en la categoría “En el medio” representan valores atípicos: estudiantes con GPA más bajo que el resto del grupo. La mayoría de los valores se concentra por encima de esos puntos, dentro del rango principal mostrado por la caja.
+  
+    #En el resumen numérico se observa que los estudiantes ubicados en Front (Al frente) presentan el promedio de GPA más alto, seguidos por Middle (En el medio) y luego Back (Al fonde). Sin embargo, las diferencias entre los promedios no parecen ser muy marcadas, por lo que descriptivamente no se observa una separación fuerte entre los grupos.
+  
+
+  
+  
 # g) Realice una tabla de frecuencias absolutas y relativas para la variable Seat y realice dos gráficos distintos que le permitan visualizar esta variable. Describa lo que observa.
- 
+  
+  #Frecuencias absolutas:
+  freq_abs_seat <- table(datos$Seat)
+  freq_abs_seat
+  #Salida:
+  # Back  Front Middle 
+  # 134    151    404
+  
+  #Frecuencias relativas:
+  freq_rel_seat <- prop.table(freq_abs_seat)
+  freq_rel_seat
+  #Salida
+  # Back     Front    Middle 
+  # 0.1944848 0.2191582 0.5863570 
+  
+  #Para hacerlo en una tabla completa:
+  tabla_seat <- data.frame(
+    Seat = names(freq_abs_seat),
+    Frecuencia_Absoluta = as.vector(freq_abs_seat),
+    Frecuencia_Relativa = as.vector(freq_rel_seat)
+  )
+  
+  tabla_seat
+  #Salida
+  # Seat Frecuencia_Absoluta Frecuencia_Relativa
+  # 1   Back                 134           0.1944848
+  # 2  Front                 151           0.2191582
+  # 3 Middle                 404           0.5863570
+  
+  #También podemos expresar las frecuencias relativas en porcentaje:
+  tabla_seat$Porcentaje <- tabla_seat$Frecuencia_Relativa * 100
+  tabla_seat
+  #Salida:
+  # Back                 134           0.1944848   19.44848
+  # 2  Front                 151           0.2191582   21.91582
+  # 3 Middle                 404           0.5863570   58.63570
+  
+  #Gráfico 1: Barras
+  barplot(freq_abs_seat,
+          names.arg = c("Al fondo", "Al frente", "En el medio"),
+          main = "Frecuencia absoluta de ubicación en el aula",
+          xlab = "Ubicación",
+          ylab = "Frecuencia",
+          col = "lightblue")
+  
+  #Gráfico 2: Gráfico circular
+  pie(freq_abs_seat,
+      labels = c("Al fondo", "Al frente", "En el medio"),
+      main = "Distribución porcentual de ubicación en el aula",
+      col = c("lightblue", "lightgreen", "lightpink"),
+      cex = 0.9)
+  
+  #Queda muy feo, así que lo retocamos un poco ya que no se ven bien las etiquetas y las cambiamos mejor a leyendas
+  
+  porcentajes_seat <- round(prop.table(freq_abs_seat) * 100, 1)
+  
+  etiquetas_seat <- paste0(
+    c("Al fondo", "Al frente", "En el medio"),
+    ": ",
+    porcentajes_seat,
+    "%"
+  )
+  
+  colores_pastel <- c("lightblue", "lightgreen", "lightpink")
+  
+  pie(freq_abs_seat,
+      labels = NA,
+      main = "Distribución porcentual de ubicación en el aula",
+      col = colores_pastel,
+      radius = 0.8)
+  
+  legend("topright",
+         legend = etiquetas_seat,
+         fill = colores_pastel,
+         cex = 0.8)
+  
+  
 # h) Realice un gráfico que le permita ver cómo se comporta la variable GPA en función de la cantidad de horas de estudio. ¿Qué observa? ¿Es posible establecer una relación entre ambas?
    
 #   i) Realice un gráfico que le permita ver cómo se comporta la variable GPA en función de la cantidad de horas de estudio, discriminando por sexo. ¿Qué observa?

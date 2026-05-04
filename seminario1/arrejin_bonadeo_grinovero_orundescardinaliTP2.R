@@ -410,6 +410,12 @@
          fill = colores_pastel,
          cex = 0.8)
   
+  #Observaciones: 
+  # La variable Seat muestra la distribución de los estudiantes según la ubicación que ocupan en el aula. A partir de la tabla de frecuencias absolutas y relativas se puede identificar cuál es la ubicación más frecuente.
+  # Los gráficos permiten visualizar rápidamente si los estudiantes se distribuyen de manera equilibrada entre las categorías o si existe una mayor concentración en alguna ubicación específica.
+  #Se observa en el gráfico que al fondo y al frente tienen casi la misma distribución, representando entre ambos un 40% del total, en cambio casi el 60% se ubica en el medio del aula
+  
+  
   
 # h) Realice un gráfico que le permita ver cómo se comporta la variable GPA en función de la cantidad de horas de estudio. ¿Qué observa? ¿Es posible establecer una relación entre ambas?
    

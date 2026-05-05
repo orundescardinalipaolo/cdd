@@ -73,7 +73,6 @@
   str(datos)
   summary(datos)
   
-  
   # >   str(datos)
   # 'data.frame':	690 obs. of  7 variables:
   #   $ Sex      : chr  "Female" "Male" "Female" "Female" ...
@@ -115,7 +114,7 @@
   #   | `StudyHrs`  | Horas semanales de estudio | Cuantitativa continua o discreta, según registro                |
      
   
-  # Las variables cuantitativas son GPA, MissClass, PartyDays y StudyHrs, ya que representan mediciones o conteos numéricos. Entre ellas, MissClass y PartyDays pueden considerarse discretas porque expresan cantidades contables.
+  #Respuesta: Las variables cuantitativas son GPA, MissClass, PartyDays y StudyHrs, ya que representan mediciones o conteos numéricos. Entre ellas, MissClass y PartyDays pueden considerarse discretas porque expresan cantidades contables.
   # Las variables cualitativas son Sex, Seat y ReligIm. La variable Sex clasifica a los estudiantes según género, Seat indica la ubicación en el aula y ReligImp representa una escala de importancia, por lo que se interpreta como cualitativa ordinal.
   
   #Las variables cualitativas, ¿qué categorías tienen?
@@ -157,7 +156,7 @@
   #0.4533599    0.2055352
   
 
-  #El histograma permite analizar la forma general de la distribución, mientras que el boxplot permite identificar la mediana, la dispersión y la posible existencia de valores atípicos.
+  #Comentario: El histograma permite analizar la forma general de la distribución, mientras que el boxplot permite identificar la mediana, la dispersión y la posible existencia de valores atípicos.
   
   #Gráfico 1: Histograma
   hist(datos$GPA,
@@ -167,7 +166,7 @@
        col = "lightblue",
        border = "white")
   
-  #En el histograma se observa que la variable GPA presenta valores concentrados alrededor de la zona central hacia la derecha de la distribución más precisamente en el ranzo entre 2.9 y 3.5
+  #Respuesta: En el histograma se observa que la variable GPA presenta valores concentrados alrededor de la zona central hacia la derecha de la distribución más precisamente en el ranzo entre 2.9 y 3.5
   
   #Gráfico 2: Boxplot
   boxplot(datos$GPA,
@@ -175,7 +174,7 @@
           ylab = "GPA (Promedio de calificaciones)",
           col = "lightgreen")
   
-    #En el boxplot de GPA se observa que la mayoría de las calificaciones se concentran entre aproximadamente 2.9 y 3.5 (coincidente con el diagrama anterior), con una mediana cercana a 3.2 (donde está linea negra en el centro del recuadro, esto quiere decir que la mitad está por debajo de ésta línea y la otra mitad por encima). Además, aparecen algunos valores atípicos inferiores, lo que indica que existen pocos estudiantes con GPA bastante más bajo que el resto. En general, los datos se concentran en valores medios-altos.
+    #Respuesta: En el boxplot de GPA se observa que la mayoría de las calificaciones se concentran entre aproximadamente 2.9 y 3.5 (coincidente con el diagrama anterior), con una mediana cercana a 3.2 (donde está linea negra en el centro del recuadro, esto quiere decir que la mitad está por debajo de ésta línea y la otra mitad por encima). Además, aparecen algunos valores atípicos inferiores, lo que indica que existen pocos estudiantes con GPA bastante más bajo que el resto. En general, los datos se concentran en valores medios-altos.
   
    
 #   e) Realice un resumen numérico y un gráfico que le permita conjeturar si las mujeres van más a fiestas que los varones. Describa lo que observa.
@@ -228,9 +227,9 @@
           xlab = "Género",
           ylab = "Promedio de días de fiesta",
           col = c("lightpink", "lightblue"))
-  # Éste gráfico no muestra diferencias significativas como el anterior
   
-  # Que observamos: Para analizar si las mujeres van más a fiestas que los varones, se comparó la variable PartyDays según la variable Sex. A partir del resumen numérico y del boxplot, se observa si alguno de los grupos presenta una mediana o media superior. 
+  ##Respuesta: Éste gráfico no muestra diferencias significativas como el anterior
+    #Para analizar si las mujeres van más a fiestas que los varones, se comparó la variable PartyDays según la variable Sex. A partir del resumen numérico y del boxplot, se observa si alguno de los grupos presenta una mediana o media superior. 
   #Si el grupo correspondiente a mujeres presenta valores centrales más altos, podría decirse que asisten a fiestas con mayor frecuencia. Sin embargo, esta observación es descriptiva y no implica por sí sola una diferencia estadísticamente significativa (se aprecia mucho mejor en el segundo gráfico).
  
   
@@ -270,7 +269,7 @@
   # 4 Middle 0.4408886
   
   
-  #Aparecen columnas sin etiquetas porque probablemente en el archivo hay valores vacíos, espacios en blanco o datos faltantes mal leídos.
+  #Comentario: Aparecen columnas sin etiquetas porque probablemente en el archivo hay valores vacíos, espacios en blanco o datos faltantes mal leídos.
   
   #Comprobación: 
   table(datos$Seat, useNA = "ifany")
@@ -324,10 +323,8 @@
           names = c("Al fondo", "Al frente", "En el medio"),
           col = "lightblue")
   
-  #Finalmente este gráfico funciona bien excluyendo el NA. Al analizar la variable Seat, se detectó un registro sin categoría asignada. Dado que no es posible identificar la ubicación del estudiante en el aula, dicho valor se consideró como dato faltante (NA) y se excluyó del análisis comparativo de GPA según ubicación. Esta decisión evita interpretar erróneamente el valor vacío como una categoría válida.
-  
+  ##Respuesta: Finalmente este gráfico funciona bien excluyendo el NA. Al analizar la variable Seat, se detectó un registro sin categoría asignada. Dado que no es posible identificar la ubicación del estudiante en el aula, dicho valor se consideró como dato faltante (NA) y se excluyó del análisis comparativo de GPA según ubicación. Esta decisión evita interpretar erróneamente el valor vacío como una categoría válida.
   #Los puntos inferiores observados en la categoría “En el medio” representan valores atípicos: estudiantes con GPA más bajo que el resto del grupo. La mayoría de los valores se concentra por encima de esos puntos, dentro del rango principal mostrado por la caja.
-  
     #En el resumen numérico se observa que los estudiantes ubicados en Front (Al frente) presentan el promedio de GPA más alto, seguidos por Middle (En el medio) y luego Back (Al fonde). Sin embargo, las diferencias entre los promedios no parecen ser muy marcadas, por lo que descriptivamente no se observa una separación fuerte entre los grupos.
   
 
@@ -386,7 +383,7 @@
       col = c("lightblue", "lightgreen", "lightpink"),
       cex = 0.9)
   
-  #Queda muy feo, así que lo retocamos un poco ya que no se ven bien las etiquetas y las cambiamos mejor a leyendas
+  #Comentario: Queda muy feo, así que lo retocamos un poco ya que no se ven bien las etiquetas y las cambiamos mejor a leyendas
   
   porcentajes_seat <- round(prop.table(freq_abs_seat) * 100, 1)
   
@@ -410,7 +407,7 @@
          fill = colores_pastel,
          cex = 0.8)
   
-  #Observaciones: 
+  #Respuesta: 
   # La variable Seat muestra la distribución de los estudiantes según la ubicación que ocupan en el aula. A partir de la tabla de frecuencias absolutas y relativas se puede identificar cuál es la ubicación más frecuente.
   # Los gráficos permiten visualizar rápidamente si los estudiantes se distribuyen de manera equilibrada entre las categorías o si existe una mayor concentración en alguna ubicación específica.
   #Se observa en el gráfico que al fondo y al frente tienen casi la misma distribución, representando entre ambos un 40% del total, en cambio casi el 60% se ubica en el medio del aula
@@ -419,7 +416,63 @@
   
 # h) Realice un gráfico que le permita ver cómo se comporta la variable GPA en función de la cantidad de horas de estudio. ¿Qué observa? ¿Es posible establecer una relación entre ambas?
    
+  plot(datos$StudyHrs, datos$GPA,
+       main = "GPA en función de las horas de estudio",
+       xlab = "Horas semanales de estudio",
+       ylab = "GPA",
+       pch = 19,
+       col = "blue")
+  
+  abline(lm(GPA ~ StudyHrs, data = datos), col = "red", lwd = 2)
+  
+  #Respuesta: El gráfico muestra una relación positiva débil entre las horas semanales de estudio y el GPA. La recta de tendencia (abline) tiene una pendiente levemente ascendente, lo que indica que, en general, quienes estudian más horas tienden a tener un GPA algo mayor. Sin embargo, la gran dispersión de los puntos muestra que la relación no es fuerte y que las horas de estudio no explican por sí solas el promedio de calificaciones.
+
+  #Coeficiente de correlación:
+  cor(datos$StudyHrs, datos$GPA, use = "complete.obs")
+  
+  #Salida
+  #[1] 0.1618092
+  #Respuesta: Como el valor está cerca de 0, indica que la relación lineal entre ambas variables es baja. De las notas tomadas en clases:
+  # Correlación cercana a 1  → relación positiva fuerte
+  # Correlación cercana a -1 → relación negativa fuerte
+  # Correlación cercana a 0  → relación débil o casi inexistente
+  
+  
+  
 #   i) Realice un gráfico que le permita ver cómo se comporta la variable GPA en función de la cantidad de horas de estudio, discriminando por sexo. ¿Qué observa?
+  
+  # plot(datos$StudyHrs, datos$GPA,
+  #      main = "GPA según horas de estudio, discriminado por sexo",
+  #      xlab = "Horas semanales de estudio",
+  #      ylab = "GPA",
+  #      pch = 19,
+  #      col = ifelse(datos$Sex == unique(datos$Sex)[1], "blue", "red"))
+  # 
+  # legend("bottomright",
+  #        legend = c("Femenino", "Masculino"),
+  #        title = "Género",
+  #        col = c("blue", "red"),
+  #        pch = 19)
+  
+  
+  library(ggplot2)
+  
+  ggplot(datos, aes(x = StudyHrs, y = GPA, color = Sex)) +
+    geom_point() +
+    geom_smooth(method = "lm", se = FALSE) +
+    labs(title = "GPA según horas de estudio, discriminado por género",
+         x = "Horas semanales de estudio",
+         y = "GPA",
+         color = "Género") +
+    scale_color_manual(
+      values = c("Female" = "lightpink", "Male" = "lightblue"),
+      labels = c("Female" = "Femenino", "Male" = "Masculino")
+    )
+  
+  # Respuesta: Al discriminar por género, se observa que tanto en femenino como en masculino existe una leve tendencia positiva entre horas de estudio y GPA. La relación parece algo más marcada en el grupo masculino, aunque en ambos casos los puntos están bastante dispersos. Por lo tanto, no puede afirmarse una relación fuerte entre ambas variables.
+  
+  
+  
    
 #   j) Realice una prueba de hipótesis que le permita comparar el promedio de las calificaciones por género; no hay sospechas previas. Escriba H0 y H1. Concluya teniendo en cuenta el p-value. Analice el cumplimiento de supuestos: normalidad de cada grupo y homogeneidad de varianzas.
 

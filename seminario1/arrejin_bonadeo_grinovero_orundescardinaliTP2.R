@@ -607,3 +607,37 @@
       
       
 # k) Si no hay diferencias significativas del promedio de calificaciones según el género, realice una estimación a través de un IC del 98 % para la verdadera calificación media.
+      
+      #Análisis previo:
+        
+        #Caso 1: Si en j) el p-value de la prueba t fue menor que 0,05 -> no correspondería calcular un único intervalo de confianza general para todos los estudiantes
+        #Caso 2: Si en j) el p-value fue mayor que 0,05 -> no habría diferencias significativas entre mujeres y varones, y sí correspondería calcular un único IC del 98% para la media general de GPA.
+      
+      #Los promedios que obtenidos:
+      # Female = 3.256887
+      # Male   = 3.083636
+      # Concluimos en el punto anterior que hay una diferencia visible entre los grupos. 
+      # La prueba t dió  p-value = 5.119e-07 (0.0000005119), que es menor que 0.05, por lo tanto no corresponde realizar el IC general, porque sí hay diferencias significativas según género.
+      
+      #Respuesta: No se desarrolla mediante el cálculo de un intervalo de confianza general, dado que la condición inicial no se cumple. La prueba t realizada en el inciso j) mostró diferencias significativas entre los promedios de GPA según género. Por ello, no resulta adecuado estimar una única media poblacional para todos los estudiantes sin distinguir entre mujeres y varones.
+      
+      #Aclaraciones: 
+      #Si hubiera diferencias significativas según género, entonces lo más correcto sería no calcular un único IC general, sino calcular un IC del 98% para la verdadera calificación media de cada grupo. Es decir:
+        
+      # IC 98% para la media verdadera de GPA en mujeres.
+      # IC 98% para la media verdadera de GPA en varones.
+      
+      # IC del 98% para GPA en mujeres
+      t.test(datos$GPA[datos$Sex == "Female"],
+             conf.level = 0.98)
+      
+      # IC del 98% para GPA en varones
+      t.test(datos$GPA[datos$Sex == "Male"],
+             conf.level = 0.98)
+      
+      #También se puede hacer con by()
+      by(datos$GPA, datos$Sex, function(x) {
+        t.test(na.omit(x), conf.level = 0.98)
+      })
+      
+      

@@ -475,5 +475,135 @@
   
    
 #   j) Realice una prueba de hipótesis que le permita comparar el promedio de las calificaciones por género; no hay sospechas previas. Escriba H0 y H1. Concluya teniendo en cuenta el p-value. Analice el cumplimiento de supuestos: normalidad de cada grupo y homogeneidad de varianzas.
+  
+  ### Normalidad de cada grupo
+  #Como no hay sospechas previas, corresponde una prueba bilateral.
+  
+  # Hipótesis
+   
+  # H0: No existen diferencias entre el promedio de GPA de mujeres y varones.
+  # Es decir: μ₁ = μ₂
+   
+  # H1: Existen diferencias entre el promedio de GPA de mujeres y varones.
+  # Es decir: μ₁ ≠ μ₂
+  
+  
+  #Primero vemos los grupos:
+    
+  table(datos$Sex)
+  #Salida:
+  # Female   Male 
+  # 382    308
+  
+  #Resumen por género
+  aggregate(GPA ~ Sex, data = datos, mean, na.rm = TRUE)
+  aggregate(GPA ~ Sex, data = datos, sd, na.rm = TRUE)
+  aggregate(GPA ~ Sex, data = datos, length)
+  
+  #Salida:
+  # > aggregate(GPA ~ Sex, data = datos, mean, na.rm = TRUE)
+  # Sex      GPA
+  # 1 Female 3.256887
+  # 2   Male 3.083636
+  # >   aggregate(GPA ~ Sex, data = datos, sd, na.rm = TRUE)
+  # Sex       GPA
+  # 1 Female 0.4245070
+  # 2   Male 0.4698712
+  # >   aggregate(GPA ~ Sex, data = datos, length)
+  # Sex GPA
+  # 1 Female 379 #no entiendo porque la longitud es diferente a la salida table(datos$Sex), puede ser que la diferencia se debe probablemente a que hay 3 casos femeninos con GPA faltante
+  # 2 Male 308
+  
+  # Supuesto de normalidad
+  # Aplicamos Shapiro-Wilk por grupo:
+  
+  by(datos$GPA, datos$Sex, shapiro.test)
+  
+  #Salida:
+  # datos$Sex: Female
+  # 
+  # Shapiro-Wilk normality test
+  # 
+  # data:  dd[x, ]
+  # W = 0.97121, p-value = 7.976e-07
+  # 
+  # ------------------------------------------------------------------------ 
+  #   datos$Sex: Male
+  # 
+  # Shapiro-Wilk normality test
+  # 
+  # data:  dd[x, ]
+  # W = 0.98234, p-value = 0.0007651
+  
+  #Respuesta:
+  #En el grupo femenino se obtuvo un p-value de 7.976e-07 (0.000000797) y en el grupo masculino un p-value de 0.0007651, ambos valores son menores que 0,05, por lo tanto se rechaza la hipótesis de normalidad en ambos grupos según el test de Shapiro-Wilk.
+  
+  
+  ### Homogeneidad de varianzas
+  #Opción 1: test de Fisher, si hay solo dos grupos.
+  #Opción 2: test de Levene, usando el paquete car.
+  
+      #Opción 1: test de Fisher
+      var.test(GPA ~ Sex, data = datos)
+  
+      #Salida
+      # F test to compare two variances
+      # 
+      # data:  GPA by Sex
+      # F = 0.81623, num df = 378, denom df = 307, p-value = 0.06062
+      # alternative hypothesis: true ratio of variances is not equal to 1
+      # 95 percent confidence interval:
+      #   0.6586425 1.0091053
+      # sample estimates:
+      #   ratio of variances 
+      # 0.816229
+  
+      #Opción 2: test de Levene.
+      library(car)
+      leveneTest(GPA ~ Sex, data = datos)
+  
+      #Salida
+      #       Levene's Test for Homogeneity of Variance (center = median)
+      #        Df F value Pr(>F)
+      # group   1   1.869  0.172
+      #       685               
+      # Aviso:
+      # In leveneTest.default(y = y, group = group, ...) : group coerced to factor.
+      
+      # Respuesta:
+      # Si p-value > 0,05 → no se rechaza la igualdad de varianzas.
+      # Si p-value < 0,05 → se rechaza la igualdad de varianzas.
+      # Pr(>F) = 0.172 es decir 0.172 > 0.05 por lo tanto no se rechaza la hipótesis de igualdad de varianzas. Por lo tanto, puede considerarse que las varianzas de GPA entre mujeres y varones son homogéneas.
 
+      ### Hastá acá se analizaron los supuestos, pero se pide explícitamente realizar una prueba de hipótesis que le permita comparar el promedio de las calificaciones por género, para ello hacemos la prueba t para comparar medias, entonces después del análisis de normalidad y varianzas hay que agregar el t.test().
+      
+      t.test(GPA ~ Sex,
+             data = datos,
+             alternative = "two.sided",
+             var.equal = TRUE)
+      
+      #Salida:
+      # Two Sample t-test
+      # 
+      # data:  GPA by Sex
+      # t = 5.0703, df = 685, p-value = 5.119e-07
+      # alternative hypothesis: true difference in means between group Female and group Male is not equal to 0
+      # 95 percent confidence interval:
+      #   0.1061600 0.2403404
+      # sample estimates:
+      #   mean in group Female   mean in group Male 
+      # 3.256887             3.083636 
+      
+      # Si bien el supuesto de normalidad no se cumple según Shapiro-Wilk, los tamaños muestrales son grandes en ambos grupos, por lo que la prueba t puede considerarse robusta frente a desviaciones de normalidad.
+      
+      
+      # Respuesta: Se realizó una prueba t bilateral para comparar el promedio de GPA entre mujeres y varones. La hipótesis nula plantea que no existen diferencias entre los promedios de ambos grupos, mientras que la hipótesis alternativa plantea que sí existen diferencias.
+      
+      # Dado que el p-value obtenido en la prueba t es menor que 0,05, se rechaza la hipótesis nula. Por lo tanto, se concluye que existen diferencias estadísticamente significativas entre el promedio de GPA de mujeres y varones.
+      
+      # A partir de los promedios muestrales, se observa que el grupo femenino (3.256887) presenta un GPA promedio mayor que el grupo masculino (3.083636).
+      
+      
+      
+      
 # k) Si no hay diferencias significativas del promedio de calificaciones según el género, realice una estimación a través de un IC del 98 % para la verdadera calificación media.

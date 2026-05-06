@@ -24,7 +24,7 @@
   #datos <- read.table("Student0405.txt", header = TRUE, fill = TRUE, strip.white = TRUE)
 
   #solución definitiva usar sep="\t" para separar por tabulaciones
-  datos <- read.delim("Student0405.txt", sep="\t", header = TRUE)
+  datos <- read.delim("seminario1/Student0405.txt", sep="\t", header = TRUE)
 
   #adjunta la base de datos
   attach(datos)

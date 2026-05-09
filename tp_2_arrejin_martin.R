@@ -44,6 +44,7 @@ hist(GPA,
 # 2. Ponemos los números nosotros, marcando cada 0.5 (1.5, 2.0, 2.5, 3.0, etc.)
 axis(side = 1, at = seq(1.5, 4.0, by = 0.5))
 
+# (Martin)-Análisis de Resultado punto D:
 #Se observa que la mayoría de los estudiantes se agrupan en las barras superiores a 3.0.
 #El gráfico muestra una asimetría negativa (hacia la izquierda), ya que la "cola" de la distribución se extiende hacia las notas más bajas. 
 #Esto indica que hay pocos alumnos con notas bajas y muchos con notas altas.
@@ -79,6 +80,7 @@ boxplot(PartyDays ~ Sex,
         ylab = "Días de fiesta", 
         col = c("lightpink", "lightblue"))
 
+# # (Martin)-Análisis de Resultado punto E:
 #A partir del análisis realizado, se conjetura que los varones asisten a fiestas 
 #con una frecuencia levemente mayor que las mujeres, dado que su mediana es superior. 
 #No obstante, el grupo femenino presenta una mayor variabilidad, 
@@ -101,20 +103,22 @@ boxplot(GPA ~ Seat,
         col = "lightgreen", 
         ylab = "Calificaciones (GPA)")
 
+
+# (Martin)-Análisis de Resultado punto F:
 # Se observa  en relación a la mediana que el grupo "Front" posee la calificación más alta, 
-#seguido por "Middle" y finalmente "Back". Esto permite conjeturar que la cercanía al frente se asocia con un mejor GPA.
-# El grupo "Back" es el más HOMOGÉNEO (caja más compacta), lo que indica que 
-# las notas de estos alumnos son más parecidas entre sí. 
+#seguido por "Middle" y finalmente "Back". Esto permite conjeturar que la cercanía 
+#al frente se asocia con un mejor GPA.El grupo "Back" es el más HOMOGÉNEO (caja más compacta),
+#lo que indica que las notas de estos alumnos son más parecidas entre sí. 
 # Los grupos "Front" y "Middle" presentan mayor HETEROGENEIDAD (cajas más altas),
 # reflejando un rendimiento académico más diverso en esas zonas. Por otro lado, 
 # El grupo "Middle" presenta la mayor cantidad de valores atípicos inferiores, 
-# con alumnos que poseen notas significativamente bajas (entre 1.5 y 2.0). 
+# con alumnos que poseen notas significativamente bajas (entre 1.5 y 2.0).
 # El grupo "Back" no presenta valores atípicos, siendo el más predecible.
 # Por útlimo, se observa una categoría sin etiqueta (linea gruesa) que corresponde a 
 #los valores 'NA' de la tabla original 
 
 
-#Realice una tabla de frecuencias absolutas y relativas para la variable Seat y realice dos graficos distintos
+#G)Realice una tabla de frecuencias absolutas y relativas para la variable Seat y realice dos graficos distintos
 #que le permitan visualizar esta variable. Describa lo que observa
 
 # 2. Tablas de Frecuencia
@@ -151,9 +155,116 @@ pie(tabla_rel,
 # Reset de la configuración
 par(mfrow=c(1,1))
 
-# Se observa un claro predominio de la zona media (Middle), que concentra
-# casi el 59% del alumnado, seguido por el front con un 21,9% y por último 
-# los que su ubicarón en black con 19,4% . El gráfico de barras facilita la lectura de 
-# frecuencias absolutas (404 alumnos en el centro), mientras que el de 
-# torta permite visualizar la estructura porcentual del aula. 
-# Se detecta un dato daltante. 
+# (Martin)-Análisis de Resultado G:
+# Se observa en el gráfico de torta que hay un claro predominio de la zona media (Middle), 
+#que concentra casi el 59% del alumnado, seguido por el zona del frente(front) con un 21,9% y por último 
+# los que su ubicarón en el fondo(black) con 19,4% . 
+#El gráfico de barras facilita la lectura de frecuencias absolutas (404 alumnos en el centro),
+# 151 de front y 134 de back. 
+#Por último, en ambos gráfico se detecta un dato daltante. 
+
+#h) Realice un grafico que le permita ver como se comporta la variable GPA en funcion de la cantidad de horas
+#de estudio. ¿Que observa? ¿Es posible establecer una relacion entre ambas?}
+# 1. Resumen estadístico
+resumen_estudio <- aggregate(GPA ~ StudyHrs, data = datos, FUN = summary)
+print(resumen_estudio)
+
+par(mar = c(2, 4, 2, 2)) #para el formato 
+
+plot(datos$StudyHrs, datos$GPA,
+     main = "Dispersión: GPA vs Horas de Estudio",
+     xlab = "Horas de Estudio", 
+     ylab = "GPA",
+     pch = 16, 
+     col = rgb(0, 0, 1, 0.5))
+# Agregamos línea de tendencia
+abline(lm(GPA ~ StudyHrs, data = datos), col = "red", lwd = 2)
+
+par(mfrow = c(1, 1))
+
+# (Martin)-Análisis de Resultado H:
+# En el diagrama de dispersión se observa que la mayor densidad de alumnos se concentra 
+# en el rango de 0 a 20 horas de estudio semanales, espacio donde se detectan desempeños 
+# académicos sobresalientes (GPA 4.0) que no dependen estrictamente de la cantidad de 
+# tiempo invertido, sugiriendo una alta eficiencia en el aprendizaje. 
+# Inversamente, se identifican casos de bajo rendimiento a pesar 
+# de una carga horaria considerable, lo que señala la existencia de valores atípicos 
+# en la muestra. La recta de regresión presenta una pendiente positiva, 
+# indicando que en promedio, el GPA tiende a incrementarse conforme aumentan las horas 
+# de estudio; sin embargo, la notable dispersión de los puntos confirma que la inversión 
+# de tiempo no es el único factor predominante, evidenciando que el éxito académico es 
+# un fenómeno multicausal donde intervienen variables adicionales al esfuerzo horario.
+
+
+# i) Relación GPA vs Horas de estudio discriminando por sexo
+
+# 1. Ajustamos los márgenes (Aumentamos el margen inferior: el primer número es el de abajo)
+# El orden es: c(abajo, izquierda, arriba, derecha)
+par(mar = c(5, 4, 4, 2) + 0.1)
+
+# 2. Generamos el gráfico (usando la columna 'Sex')
+colores <- ifelse(datos$Sex == "Female", "hotpink", "dodgerblue")
+plot(datos$StudyHrs, datos$GPA, 
+     main = "GPA vs Horas de Estudio-FyM",
+     xlab = "Horas de Estudio Semanales", 
+     ylab = "GPA",
+     pch = 19, 
+     col = colores,
+     las = 1)
+
+# 3. Agregamos las rectas de regresión
+abline(lm(GPA ~ StudyHrs, data = subset(datos, Sex == "Female")), col = "hotpink", lwd = 3)
+abline(lm(GPA ~ StudyHrs, data = subset(datos, Sex == "Male")), col = "dodgerblue", lwd = 3)
+
+# 4. Leyenda FUERA del gráfico
+# inset = c(0, -0.4) la mueve hacia abajo fuera del cuadro
+# xpd = TRUE permite que R dibuje fuera del área de los ejes
+legend(x = "bottom", 
+       legend = c("Mujeres", "Varones"), 
+       col = c("hotpink", "dodgerblue"), 
+       pch = 19, 
+       lty = 1, 
+       lwd = 2,
+       horiz = TRUE,
+       bty = "n",
+       inset = c(0, -0.50), 
+       xpd = TRUE)
+
+# En el diagrama de dispersión se identifica una alta densidad de datos en el rango 
+# de 0 a 20 horas de estudio. Se observa que las mujeres presentan un promedio inicial 
+# superior (mayor intercepto) independientemente de la carga horaria; no obstante, su 
+# recta de regresión muestra una tendencia más estable, lo que confirma que el tiempo 
+# invertido no garantiza por sí solo una nota específica debido a la dispersión de los 
+# datos. Por el contrario, en los hombres se aprecia una pendiente positiva más 
+# pronunciada, lo que arroja que su GPA tiene una mayor sensibilidad al incremento de 
+# horas de estudio, permitiéndoles mejorar su rendimiento promedio de forma más 
+# acelerada ante una mayor dedicación horaria.
+
+
+#j) Realice una prueba de hipotesis que le permita comparar el promedio de las 
+#calificaciones por genero, no hay sospechas previas. Escriba H0 y H1. 
+#Concluya teniendo en cuenta el p-value. Analice el cumplimiento de
+#supuestos: normalidad de cada grupo y homogeneidad de variancias.
+
+
+# 1. Crear los vectores por grupo
+gpa_mujeres <- datos$GPA[datos$Sex == "Female"]
+gpa_varones <- datos$GPA[datos$Sex == "Male"]
+
+# 2. Supuesto de Normalidad (Prueba de Shapiro-Wilk)
+# H0: Los datos siguen una distribución normal
+shapiro_m <- shapiro.test(gpa_mujeres)
+shapiro_v <- shapiro.test(gpa_varones)
+
+cat("P-value Normalidad Mujeres:", shapiro_m$p.value, "\n")
+cat("P-value Normalidad Varones:", shapiro_v$p.value, "\n")
+
+# 3. Supuesto de Homogeneidad de Varianzas (Prueba F)
+# H0: Las varianzas son iguales
+test_varianza <- var.test(GPA ~ Sex, data = datos)
+cat("P-value Homogeneidad de Varianzas:", test_varianza$p.value, "\n")
+
+# 4. Prueba t de Student
+# Si el p-value de varianza > 0.05, usamos var.equal = TRUE
+t_resultado <- t.test(GPA ~ Sex, data = datos, var.equal = TRUE)
+print(t_resultado)

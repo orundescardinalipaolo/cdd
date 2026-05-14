@@ -1,0 +1,603 @@
+---
+title: "Trabajo Práctico 2"
+subtitle: "Estimación de parámetros, correlaciones entre variables, gráficos y pruebas de hipótesis"
+author: "Martin Arrejin - Pamela Bonadeo - Santiago Grinóvero - Paolo Orundés Cardinali"
+date: "08/05/2026"
+output:
+  pdf_document:
+    toc: true
+    toc_depth: 2
+  html_document:
+    toc: true
+    toc_depth: 2
+    number_sections: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  fig.align = "center",
+  fig.width = 7,
+  fig.height = 4
+)
+```
+
+# Datos generales
+
+**Maestría en Ciencia de Datos - FCyT - UADER**  
+**Seminario 1. Técnicas de Análisis en Ciencias de Datos**  
+**Trabajo Práctico 2. Estimación de parámetros. Correlaciones entre variables. Gráficos. Pruebas de Hipótesis.**
+
+**Integrantes:** Martin Arrejin - Pamela Bonadeo - Santiago Grinóvero - Paolo Orundés Cardinali  
+**Código en repositorio:** <https://github.com/orundescardinalipaolo/cdd>
+
+# Introducción
+
+Se trabaja con la base de datos `Student0405.txt`, que contiene datos recolectados durante los años 2004 y 2005 de estudiantes en clases de estadística de una Universidad de Estados Unidos.
+
+Las variables consideradas son: género (`Sex`), promedio de calificaciones (`GPA`), importancia de la religión en sus vidas (`ReligImp`), cantidad de faltas promedio por semana (`MissClass`), ubicación en el aula (`Seat`), días de fiesta en un mes (`PartyDays`) y horas semanales de estudio (`StudyHrs`).
+
+# a) Visualización de la base de datos y variables
+
+La primera alternativa de lectura con `read.table()` produjo un error porque la base está separada por tabulaciones. Por ese motivo se utiliza `read.delim()` indicando `sep = "\t"`.
+
+```{r carga-datos}
+# Ruta del archivo de datos.
+# Si el archivo está dentro de la carpeta seminario1, se usa esa ruta.
+# Si está en la misma carpeta del Rmd, se usa Student0405.txt.
+ruta_datos <- if (file.exists("seminario1/Student0405.txt")) {
+  "seminario1/Student0405.txt"
+} else {
+  "Student0405.txt"
+}
+
+# Carga de datos separados por tabulaciones.
+datos <- read.delim(
+  ruta_datos,
+  sep = "\t",
+  header = TRUE,
+  strip.white = TRUE,
+  na.strings = c("", "NA")
+)
+
+# Conversión de variables numéricas.
+datos$GPA <- as.numeric(datos$GPA)
+datos$MissClass <- as.numeric(datos$MissClass)
+datos$PartyDays <- as.numeric(datos$PartyDays)
+datos$StudyHrs <- as.numeric(datos$StudyHrs)
+
+# Limpieza de espacios y valores vacíos en Seat.
+datos$Seat <- trimws(datos$Seat)
+datos$Seat[datos$Seat == ""] <- NA
+
+# Adjuntamos la base de datos.
+attach(datos)
+
+# Visualización de estructura y primeros registros.
+str(datos)
+head(datos)
+```
+
+El comando `View(datos)` puede utilizarse en RStudio para abrir la base en una ventana tipo planilla. Se deja indicado, pero no se ejecuta automáticamente al compilar el RMarkdown.
+
+```{r view-datos, eval=FALSE}
+View(datos)
+```
+
+# b) Tamaño muestral y cantidad de variables
+
+```{r tamanio-muestral}
+nrow(datos)   # cantidad de observaciones
+ncol(datos)   # cantidad de variables
+dim(datos)    # filas y columnas
+```
+
+# c) Variables cuantitativas y cualitativas
+
+```{r variables-tipos}
+str(datos)
+summary(datos)
+```
+
+Para identificar las categorías de las variables cualitativas se utilizan tablas de frecuencia.
+
+```{r categorias-cualitativas}
+table(datos$Sex, useNA = "ifany")
+table(datos$Seat, useNA = "ifany")
+table(datos$ReligImp, useNA = "ifany")
+```
+
+## Observaciones
+
+**Pamela - Paolo - Martín - Santiago**
+
+Las variables cuantitativas son `GPA`, `MissClass`, `PartyDays` y `StudyHrs`, ya que representan mediciones o conteos numéricos. Entre ellas, `MissClass` y `PartyDays` pueden considerarse discretas porque expresan cantidades contables.
+
+Las variables cualitativas son `Sex`, `Seat` y `ReligImp`. La variable `Sex` clasifica a los estudiantes según género, `Seat` indica la ubicación en el aula y `ReligImp` representa una escala de importancia, por lo que se interpreta como cualitativa ordinal.
+
+| Variable | Descripción | Tipo |
+|---|---|---|
+| `Sex` | Género | Cualitativa nominal |
+| `GPA` | Promedio de calificaciones | Cuantitativa continua |
+| `ReligImp` | Importancia de la religión | Cualitativa ordinal |
+| `MissClass` | Faltas promedio por semana | Cuantitativa discreta |
+| `Seat` | Ubicación en el aula | Cualitativa nominal |
+| `PartyDays` | Días de fiesta en un mes | Cuantitativa discreta |
+| `StudyHrs` | Horas semanales de estudio | Cuantitativa discreta o continua, según criterio de registro |
+
+Las categorías observadas son las siguientes: en `Sex`, `Female` y `Male`; en `Seat`, `Back`, `Front` y `Middle`; y en `ReligImp`, `Fairly`, `Not` y `Very`.
+
+# d) Resumen numérico y distribución de GPA
+
+```{r resumen-gpa}
+resumen_GPA <- data.frame(
+  Minimo = min(datos$GPA, na.rm = TRUE),
+  Q1 = quantile(datos$GPA, 0.25, na.rm = TRUE),
+  Mediana = median(datos$GPA, na.rm = TRUE),
+  Media = mean(datos$GPA, na.rm = TRUE),
+  Q3 = quantile(datos$GPA, 0.75, na.rm = TRUE),
+  Maximo = max(datos$GPA, na.rm = TRUE),
+  Desvio_Estandar = sd(datos$GPA, na.rm = TRUE),
+  Varianza = var(datos$GPA, na.rm = TRUE)
+)
+
+resumen_GPA
+```
+
+## Histograma
+
+```{r histograma-gpa}
+hist(datos$GPA,
+     main = "Distribución de GPA",
+     xlab = "GPA (Promedio de calificaciones)",
+     ylab = "Frecuencia",
+     col = "lightblue",
+     border = "white")
+```
+
+## Boxplot
+
+```{r boxplot-gpa}
+boxplot(datos$GPA,
+        main = "Boxplot de GPA",
+        ylab = "GPA (Promedio de calificaciones)",
+        col = "lightgreen")
+```
+
+## Observaciones
+
+**Pamela - Paolo**
+
+En el histograma se observa que la variable `GPA` presenta valores concentrados alrededor de la zona central hacia la derecha de la distribución, más precisamente en el rango aproximado entre 2.9 y 3.5.
+
+En el boxplot de `GPA` se observa que la mayoría de las calificaciones se concentran entre aproximadamente 2.9 y 3.5, con una mediana cercana a 3.2. Además, aparecen algunos valores atípicos inferiores, lo que indica que existen pocos estudiantes con GPA bastante más bajo que el resto. En general, los datos se concentran en valores medios-altos.
+
+**Martin**
+
+En el histograma se observa que la mayoría de los estudiantes se agrupan en las barras superiores a 3.0. El gráfico muestra una asimetría negativa hacia la izquierda, ya que la cola de la distribución se extiende hacia las notas más bajas. Esto indica que hay pocos alumnos con notas bajas y muchos con notas altas.
+
+Si a este estudio sumamos la desviación estándar, se observa que entre 2.7 y 3.6 aproximadamente se ubica el rango de promedio ± 1 desvío, lo que confirma que los datos tienen una dispersión baja. El desvío estándar de 0.45 se refleja en el histograma como una concentración alta de alumnos alrededor del promedio.
+
+La caja muestra que el 50% central de los alumnos tiene un rendimiento muy parejo, entre 2.93 y 3.51. Lo más destacable son los valores atípicos representados por los puntos inferiores, por debajo de 2.1. Estos alumnos tienen un rendimiento inusualmente bajo en comparación con la tendencia general del curso.
+
+**Santiago**
+
+Mediante el histograma podemos observar que la variable `GPA` posee una distribución de valores levemente asimétrica, desviándose hacia los valores más altos, y con su zona central alojada entre el rango de 2.9 y 3.5, valores que se corroboran con los resultados obtenidos del `summary()` para el primer y tercer cuartil.
+
+Respecto al boxplot realizado, nos permite visualizar que la mediana se halla aproximadamente al medio entre los cuartiles contiguos, como así también que se poseen unos pocos valores outliers inferiores a 2.9, siendo el mínimo de 1.5.
+
+Todo el conjunto nos permite afirmar que la mayor parte de las calificaciones se concentran en valores altos, con algunas pocas excepciones que se encuentran muy por debajo del resto.
+
+# e) Días de fiesta por mes según género
+
+```{r resumen-party-sexo}
+aggregate(PartyDays ~ Sex, data = datos, summary)
+aggregate(PartyDays ~ Sex, data = datos, mean, na.rm = TRUE)
+aggregate(PartyDays ~ Sex, data = datos, median, na.rm = TRUE)
+aggregate(PartyDays ~ Sex, data = datos, sd, na.rm = TRUE)
+```
+
+## Boxplot
+
+```{r boxplot-party-sexo}
+boxplot(PartyDays ~ Sex,
+        data = datos,
+        main = "Días de fiesta por mes según género",
+        xlab = "Género",
+        ylab = "Días de fiesta por mes",
+        names = c("Femenino", "Masculino"),
+        col = c("lightpink", "lightblue"))
+```
+
+## Gráfico de barras con promedios
+
+```{r barplot-party-sexo}
+promedios_party <- aggregate(PartyDays ~ Sex, data = datos, mean, na.rm = TRUE)
+
+promedios_party$Genero <- factor(promedios_party$Sex,
+                                 levels = c("Female", "Male"),
+                                 labels = c("Femenino", "Masculino"))
+
+barplot(promedios_party$PartyDays,
+        names.arg = promedios_party$Genero,
+        main = "Promedio de días de fiesta según género",
+        xlab = "Género",
+        ylab = "Promedio de días de fiesta",
+        col = c("lightpink", "lightblue"))
+```
+
+## Observaciones
+
+**Pamela - Paolo**
+
+Para analizar si las mujeres van más a fiestas que los varones, se comparó la variable `PartyDays` según la variable `Sex`. A partir del resumen numérico y del boxplot, no se observan diferencias marcadas entre ambos grupos. La media es apenas superior en el grupo femenino, mientras que la mediana es apenas superior en el grupo masculino.
+
+Por lo tanto, descriptivamente no se puede afirmar una diferencia relevante entre mujeres y varones en la cantidad de días de fiesta por mes. Además, esta observación es descriptiva y no implica por sí sola una diferencia estadísticamente significativa.
+
+**Martin**
+
+A partir del análisis realizado, se conjetura que los varones asisten a fiestas con una frecuencia levemente mayor que las mujeres, dado que su mediana es superior. No obstante, el grupo femenino presenta una mayor variabilidad, evidenciada en una caja más alta; esto indica que el 50% central de las mujeres tiene hábitos sociales muy diversos entre sí.
+
+Por el contrario, el grupo masculino es más homogéneo, con caja más compacta, concentrando a la mayoría de sus integrantes en un rango de días más estrecho, con la excepción de tres casos atípicos que presentan frecuencias de salida extremadamente elevadas.
+
+**Santiago**
+
+A partir del gráfico realizado y los valores obtenidos se puede observar que la mediana indica que el 50% de los varones van levemente más a fiestas que las mujeres. Sin embargo, el promedio de la cantidad de concurrencias, y el tercer y cuarto cuartil indican que si comparamos en ambos grupos el 50% que más salen de fiesta, las mujeres lo realizan en mayor cantidad que los varones.
+
+A su vez, cabe destacar que el valor máximo en ambos casos es idéntico, por lo que el mayor valor en la media de las mujeres no estaría siendo desviado a causa del valor outlier exclusivamente.
+
+# f) GPA según ubicación en el aula
+
+```{r resumen-gpa-seat}
+aggregate(GPA ~ Seat, data = datos, summary)
+aggregate(GPA ~ Seat, data = datos, mean, na.rm = TRUE)
+aggregate(GPA ~ Seat, data = datos, median, na.rm = TRUE)
+aggregate(GPA ~ Seat, data = datos, sd, na.rm = TRUE)
+```
+
+Se verifica si existen valores faltantes en `Seat`.
+
+```{r seat-faltantes}
+table(datos$Seat, useNA = "ifany")
+datos[is.na(datos$Seat), ]
+```
+
+Se crea una base auxiliar excluyendo los casos sin ubicación en aula.
+
+```{r datos-seat}
+datos_seat <- subset(datos, !is.na(Seat))
+
+aggregate(GPA ~ Seat, data = datos_seat, summary)
+aggregate(GPA ~ Seat, data = datos_seat, mean, na.rm = TRUE)
+aggregate(GPA ~ Seat, data = datos_seat, sd, na.rm = TRUE)
+```
+
+## Boxplot
+
+```{r boxplot-gpa-seat}
+boxplot(GPA ~ Seat,
+        data = datos_seat,
+        main = "GPA según ubicación en el aula",
+        xlab = "Ubicación en el aula",
+        ylab = "GPA",
+        names = c("Al fondo", "Al frente", "En el medio"),
+        col = "lightblue")
+```
+
+## Observaciones
+
+**Pamela - Paolo**
+
+Al analizar la variable `Seat`, se detectó un registro sin categoría asignada. Dado que no es posible identificar la ubicación del estudiante en el aula, dicho valor se consideró como dato faltante (`NA`) y se excluyó del análisis comparativo de `GPA` según ubicación. Esta decisión evita interpretar erróneamente el valor vacío como una categoría válida.
+
+En el resumen numérico se observa que los estudiantes ubicados al frente presentan el promedio de GPA más alto, seguidos por quienes se ubican en el medio y luego por quienes se ubican al fondo. Sin embargo, las diferencias entre los promedios no parecen ser muy marcadas, por lo que descriptivamente no se observa una separación fuerte entre los grupos.
+
+Los puntos inferiores observados especialmente en la categoría “En el medio” representan valores atípicos, es decir, estudiantes con GPA más bajo que el resto del grupo.
+
+**Martin**
+
+Se observa en relación a la mediana que el grupo `Front` posee la calificación más alta, seguido por `Middle` y finalmente `Back`. Esto permite conjeturar que la cercanía al frente se asocia con un mejor GPA.
+
+El grupo `Back` es el más homogéneo, con caja más compacta, lo que indica que las notas de estos alumnos son más parecidas entre sí. Los grupos `Front` y `Middle` presentan mayor heterogeneidad, con cajas más altas, reflejando un rendimiento académico más diverso en esas zonas.
+
+Por otro lado, el grupo `Middle` presenta la mayor cantidad de valores atípicos inferiores, con alumnos que poseen notas significativamente bajas, entre 1.5 y 2.0. El grupo `Back` no presenta valores atípicos, siendo el más predecible.
+
+**Santiago**
+
+Mediante el análisis realizado podemos observar efectivamente una correlación entre la ubicación en el aula y la calificación `GPA` obtenida, ya que tanto los cuartiles como la media indican una mejora cuanto más al frente del aula se sienta el alumno.
+
+Cabe destacar que un único dato no poseía información al respecto, por lo que poseemos una alta tasa de confiabilidad de los datos. También se observa que, en el caso puntual de la ubicación `Middle`, existen varios valores outliers por debajo del rango inferior de los cuartiles. Estos valores outliers indican que hay un cierto grupo de alumnos en dicho grupo que poseen un rendimiento destacablemente inferior al del resto.
+
+# g) Frecuencias absolutas y relativas de Seat
+
+```{r frecuencias-seat}
+freq_abs_seat <- table(datos_seat$Seat)
+freq_rel_seat <- prop.table(freq_abs_seat)
+
+tabla_seat <- data.frame(
+  Seat = names(freq_abs_seat),
+  Frecuencia_Absoluta = as.vector(freq_abs_seat),
+  Frecuencia_Relativa = as.vector(freq_rel_seat)
+)
+
+tabla_seat$Porcentaje <- tabla_seat$Frecuencia_Relativa * 100
+tabla_seat
+```
+
+## Gráfico de barras
+
+```{r barplot-seat}
+barplot(freq_abs_seat,
+        names.arg = c("Al fondo", "Al frente", "En el medio"),
+        main = "Frecuencia absoluta de ubicación en el aula",
+        xlab = "Ubicación",
+        ylab = "Frecuencia",
+        col = "lightblue")
+```
+
+## Gráfico circular
+
+```{r pie-seat}
+porcentajes_seat <- round(prop.table(freq_abs_seat) * 100, 1)
+
+etiquetas_seat <- paste0(
+  c("Al fondo", "Al frente", "En el medio"),
+  ": ",
+  porcentajes_seat,
+  "%"
+)
+
+colores_pastel <- c("lightblue", "lightgreen", "lightpink")
+
+pie(freq_abs_seat,
+    labels = NA,
+    main = "Distribución porcentual de ubicación en el aula",
+    col = colores_pastel,
+    radius = 0.8)
+
+legend("topright",
+       legend = etiquetas_seat,
+       fill = colores_pastel,
+       cex = 0.8)
+```
+
+## Observaciones
+
+**Pamela - Paolo**
+
+La variable `Seat` muestra la distribución de los estudiantes según la ubicación que ocupan en el aula. A partir de la tabla de frecuencias absolutas y relativas se puede identificar cuál es la ubicación más frecuente.
+
+Los gráficos permiten visualizar rápidamente si los estudiantes se distribuyen de manera equilibrada entre las categorías o si existe una mayor concentración en alguna ubicación específica. Se observa que las categorías “Al fondo” y “Al frente” tienen una distribución relativamente similar, representando entre ambas alrededor del 40% del total, mientras que casi el 60% de los estudiantes se ubica en el medio del aula.
+
+**Martin**
+
+Se observa en el gráfico de torta que hay un claro predominio de la zona media (`Middle`), que concentra casi el 59% del alumnado, seguido por la zona del frente (`Front`) con un 21,9% y por último quienes se ubican en el fondo (`Back`) con 19,4%.
+
+El gráfico de barras facilita la lectura de frecuencias absolutas: 404 alumnos en el centro, 151 en el frente y 134 al fondo. Por último, en ambos gráficos se detecta un dato faltante.
+
+**Santiago**
+
+Se puede observar mediante los datos obtenidos que más del 50% de los alumnos se ubican en la zona media del aula, mientras que el resto está distribuido casi a partes iguales entre las zonas frontal y posterior. Esto puede deberse tanto a la elección de los mismos alumnos, como a la cantidad de espacios disponibles o las mismas dimensiones reales de las zonas.
+
+# h) GPA en función de horas semanales de estudio
+
+```{r scatter-gpa-studyhrs}
+plot(datos$StudyHrs, datos$GPA,
+     main = "GPA en función de las horas de estudio",
+     xlab = "Horas semanales de estudio",
+     ylab = "GPA",
+     pch = 19,
+     col = "blue")
+
+abline(lm(GPA ~ StudyHrs, data = datos), col = "red", lwd = 2)
+```
+
+## Coeficiente de correlación
+
+```{r correlacion-gpa-studyhrs}
+cor(datos$StudyHrs, datos$GPA, use = "complete.obs")
+```
+
+## Observaciones
+
+**Pamela - Paolo**
+
+El gráfico muestra una relación positiva débil entre las horas semanales de estudio y el `GPA`. La recta de tendencia tiene una pendiente levemente ascendente, lo que indica que, en general, quienes estudian más horas tienden a tener un GPA algo mayor.
+
+Sin embargo, la gran dispersión de los puntos muestra que la relación no es fuerte y que las horas de estudio no explican por sí solas el promedio de calificaciones. El coeficiente de correlación obtenido es cercano a 0, por lo que confirma que la relación lineal entre ambas variables es baja.
+
+**Martin**
+
+En el diagrama de dispersión se observa que la mayor densidad de alumnos se concentra en el rango de 0 a 20 horas de estudio semanales, espacio donde se detectan desempeños académicos sobresalientes, con `GPA` 4.0, que no dependen estrictamente de la cantidad de tiempo invertido, sugiriendo una alta eficiencia en el aprendizaje.
+
+Inversamente, se identifican casos de bajo rendimiento a pesar de una carga horaria considerable, lo que señala la existencia de valores atípicos en la muestra. La recta de regresión presenta una pendiente positiva, indicando que en promedio el GPA tiende a incrementarse conforme aumentan las horas de estudio; sin embargo, la notable dispersión de los puntos confirma que la inversión de tiempo no es el único factor predominante.
+
+**Santiago**
+
+Mediante el gráfico realizado se puede observar que, si bien hay cierta tendencia a que los alumnos con mayor cantidad de horas de estudio tienen mejores calificaciones, ya que no hay datos de alumnos con muchas horas de estudio y GPA bajo, la distribución no presenta un comportamiento lineal y predecible.
+
+Esto se puede conjeturar debido a la dispersión de los valores que ocurre entre las 0 y 20 horas de estudio, presentando valores de calificaciones que van desde muy bajos hasta sobresalientemente buenos, independientemente de la cantidad de horas de estudio.
+
+# i) GPA en función de horas de estudio, discriminando por sexo
+
+```{r scatter-gpa-studyhrs-sexo}
+library(ggplot2)
+
+ggplot(datos, aes(x = StudyHrs, y = GPA, color = Sex)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(title = "GPA según horas de estudio, discriminado por género",
+       x = "Horas semanales de estudio",
+       y = "GPA",
+       color = "Género") +
+  scale_color_manual(
+    values = c("Female" = "lightpink", "Male" = "lightblue"),
+    labels = c("Female" = "Femenino", "Male" = "Masculino")
+  )
+```
+
+## Observaciones
+
+**Pamela - Paolo**
+
+Al discriminar por género, se observa que tanto en femenino como en masculino existe una leve tendencia positiva entre horas de estudio y GPA. La relación parece algo más marcada en el grupo masculino, aunque en ambos casos los puntos están bastante dispersos. Por lo tanto, no puede afirmarse una relación fuerte entre ambas variables.
+
+**Martin**
+
+En el diagrama de dispersión se identifica una alta densidad de datos en el rango de 0 a 20 horas de estudio. Se observa que las mujeres presentan un promedio inicial superior, con mayor intercepto, independientemente de la carga horaria. No obstante, su recta de regresión muestra una tendencia más estable, lo que confirma que el tiempo invertido no garantiza por sí solo una nota específica debido a la dispersión de los datos.
+
+Por el contrario, en los hombres se aprecia una pendiente positiva más pronunciada, lo que indica que su GPA tiene una mayor sensibilidad al incremento de horas de estudio, permitiéndoles mejorar su rendimiento promedio de forma más acelerada ante una mayor dedicación horaria.
+
+**Santiago**
+
+Al igual que en los datos y gráficos obtenidos en el ítem anterior, se puede llegar a la conclusión de que no se puede establecer una correlación fuerte entre ambas variables. Sin embargo, sí se puede conjeturar que la distribución entre estas dos variables no varía drásticamente en función del sexo, presentando solamente una leve diferencia en las posibles pendientes de tendencia, siendo mayor en la de los varones.
+
+# j) Prueba de hipótesis para comparar GPA promedio por género
+
+Como no hay sospechas previas, corresponde una prueba bilateral.
+
+**Hipótesis nula:**  
+$H_0$: No existen diferencias entre el promedio de GPA de mujeres y varones. Es decir, $\mu_1 = \mu_2$.
+
+**Hipótesis alternativa:**  
+$H_1$: Existen diferencias entre el promedio de GPA de mujeres y varones. Es decir, $\mu_1 \neq \mu_2$.
+
+## Grupos y resumen por género
+
+```{r resumen-gpa-sexo}
+table(datos$Sex)
+aggregate(GPA ~ Sex, data = datos, mean, na.rm = TRUE)
+aggregate(GPA ~ Sex, data = datos, sd, na.rm = TRUE)
+aggregate(GPA ~ Sex, data = datos, length)
+```
+
+Se verifica si existen datos faltantes en `GPA` por género.
+
+```{r faltantes-gpa-sexo}
+table(datos$Sex, is.na(datos$GPA))
+```
+
+## Normalidad de cada grupo
+
+```{r normalidad-gpa-sexo}
+by(datos$GPA, datos$Sex, function(x) shapiro.test(na.omit(x)))
+```
+
+## Homogeneidad de varianzas
+
+### Test de Fisher
+
+```{r fisher-varianzas}
+var.test(GPA ~ Sex, data = datos)
+```
+
+### Test de Levene
+
+```{r levene-varianzas}
+if (requireNamespace("car", quietly = TRUE)) {
+  car::leveneTest(GPA ~ Sex, data = datos)
+} else {
+  message("El paquete 'car' no está instalado. Instalar con install.packages('car') para ejecutar leveneTest().")
+}
+```
+
+## Prueba t para comparar medias
+
+Dado que el test de Levene no rechaza la igualdad de varianzas, se utiliza la prueba t bilateral con varianzas iguales.
+
+```{r ttest-gpa-sexo}
+t.test(GPA ~ Sex,
+       data = datos,
+       alternative = "two.sided",
+       var.equal = TRUE)
+```
+
+## Observaciones
+
+**Pamela - Paolo**
+
+En el grupo femenino se obtuvo un p-value de Shapiro-Wilk menor que 0,05 y en el grupo masculino también se obtuvo un p-value menor que 0,05. Por lo tanto, se rechaza la hipótesis de normalidad en ambos grupos según el test de Shapiro-Wilk.
+
+Para analizar la homogeneidad de varianzas se aplicó el test de Levene. Como el p-value obtenido es mayor que 0,05, no se rechaza la hipótesis de igualdad de varianzas. Por lo tanto, puede considerarse que las varianzas de GPA entre mujeres y varones son homogéneas.
+
+Luego se realizó una prueba t bilateral para comparar el promedio de GPA entre mujeres y varones. La hipótesis nula plantea que no existen diferencias entre los promedios de ambos grupos, mientras que la hipótesis alternativa plantea que sí existen diferencias.
+
+Dado que el p-value obtenido en la prueba t es menor que 0,05, se rechaza la hipótesis nula. Por lo tanto, se concluye que existen diferencias estadísticamente significativas entre el promedio de GPA de mujeres y varones. A partir de los promedios muestrales, se observa que el grupo femenino presenta un GPA promedio mayor que el grupo masculino.
+
+Si bien el supuesto de normalidad no se cumple según Shapiro-Wilk, los tamaños muestrales son grandes en ambos grupos, por lo que la prueba t puede considerarse robusta frente a desviaciones de normalidad.
+
+**Martin**
+
+Partimos de dos hipótesis:
+
+- $H_0$: no hay diferencia significativa entre el promedio de las mujeres y de los hombres.
+- $H_1$: existe una diferencia significativa entre los promedios por género.
+
+En el análisis, cuando el p-value es mayor que 0,05 no se rechaza la hipótesis nula. Cuando el p-value es menor que 0,05 se rechaza la hipótesis nula. Como el p-value obtenido es 0.0000005119, o 5.119e-07, el cual es significativamente menor que 0,05, rechazamos la hipótesis nula.
+
+Existe evidencia estadística suficiente para afirmar que hay una diferencia significativa en el rendimiento académico entre géneros. En la muestra analizada, las mujeres presentan un GPA promedio superior, 3.26, frente al de los varones, 3.08. La diferencia estimada a favor del grupo femenino se sitúa entre 0.10 y 0.24 puntos con un 95% de confianza.
+
+**Santiago**
+
+Las hipótesis planteadas fueron:
+
+- $H_0$: no existe diferencia significativa en el promedio entre ambos géneros.
+- $H_1$: hay una diferencia significativa del promedio de un género respecto al del otro.
+
+Se realizaron los análisis de los supuestos de normalidad y homogeneidad de varianzas. Luego se procedió con la evaluación de la hipótesis.
+
+Como al realizar dicha prueba se obtuvo un p-value significativamente inferior al 0,05 establecido como límite, la misma permite descartar con un 95% de confianza que la media del rendimiento académico obtenido mediante los valores del GPA sea la misma para ambos sexos.
+
+# k) Intervalo de confianza del 98% para la verdadera calificación media
+
+La consigna indica que este intervalo debe calcularse solo si no existen diferencias significativas del promedio de calificaciones según género.
+
+A partir de la prueba t realizada en el inciso j), se obtuvo un p-value menor que 0,05. Por lo tanto, se concluyó que existen diferencias estadísticamente significativas entre los promedios de GPA de mujeres y varones.
+
+## Observaciones
+
+**Pamela - Paolo**
+
+No se desarrolla el cálculo de un intervalo de confianza general, dado que la condición inicial no se cumple. La prueba t realizada en el inciso j) mostró diferencias significativas entre los promedios de GPA según género. Por ello, no resulta adecuado estimar una única media poblacional para todos los estudiantes sin distinguir entre mujeres y varones.
+
+Como aclaración metodológica, si se quisieran estimar intervalos de confianza del 98% considerando la diferencia encontrada por género, lo más adecuado sería calcularlos por separado para cada grupo.
+
+**Martin**
+
+Con un nivel de confianza del 98%, se estima que el promedio de calificaciones de toda la población estudiantil se encuentra en un intervalo estrecho alrededor de la media global. Gracias al gran tamaño de la muestra, el margen de error es reducido.
+
+Es importante destacar que este valor promediado de todo el grupo oculta la realidad demostrada en el punto j): las mujeres y los hombres rinden de manera distinta, siendo el promedio femenino significativamente superior. Por lo tanto, el promedio global actúa como un punto intermedio que no refleja la diferencia encontrada entre mujeres y varones.
+
+**Santiago**
+
+Dado que en el caso anterior con una certeza del 95% fue suficiente para tener confianza en descartar el supuesto de que la media de las calificaciones de ambos géneros sea igual, se considera innecesario volver a realizar el cálculo como un único intervalo general, ya que simplemente confirmaría lo ya conjeturado.
+
+## Intervalos de confianza del 98% por género
+
+```{r ic98-genero}
+# IC del 98% para GPA en mujeres
+t.test(na.omit(datos$GPA[datos$Sex == "Female"]),
+       conf.level = 0.98)
+
+# IC del 98% para GPA en varones
+t.test(na.omit(datos$GPA[datos$Sex == "Male"]),
+       conf.level = 0.98)
+```
+
+También se puede realizar con `by()`.
+
+```{r ic98-genero-by}
+by(datos$GPA, datos$Sex, function(x) {
+  t.test(na.omit(x), conf.level = 0.98)
+})
+```
+
+# Cierre
+
+Al finalizar, se libera la base adjuntada con `attach()`.
+
+```{r cierre}
+detach(datos)
+```

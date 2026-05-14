@@ -207,6 +207,8 @@
   # 1 Female  5.458724
   # 2   Male  5.454689
   
+  
+  
   #Gráfico
   boxplot(PartyDays ~ Sex,
           data = datos,
@@ -217,6 +219,8 @@
           col = c("lightpink", "lightblue"))
   
   #otro gráfico
+  promedios_party <- aggregate(PartyDays ~ Sex, data = datos, mean, na.rm = TRUE)
+  
   promedios_party$Genero <- factor(promedios_party$Sex,
                                    levels = c("Female", "Male"),
                                    labels = c("Femenino", "Masculino"))

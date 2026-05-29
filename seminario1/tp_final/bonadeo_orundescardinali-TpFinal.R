@@ -360,3 +360,63 @@ ggplot(precio_producto_anio, aes(x = anio, y = precio_promedio, group = producto
 
 # Ejercicio: Construcción e interpretación de intervalos de confianza para variables cualitativas, considerar alguna 
 # categoría de interés y desde allí la construcción.
+
+# INTERVALO DE CONFIANZA PARA VARIABLE CUALITATIVA
+# Variable: empresabandera
+# Categoría de interés: SHELL C.A.P.S.A.
+
+# Tabla de frecuencias por bandera comercial
+tabla_bandera <- combustibles %>%
+  count(empresabandera, sort = TRUE) %>%
+  mutate(
+    porcentaje = round(n / sum(n) * 100, 2)
+  )
+
+tabla_bandera
+
+
+#Definir la categoría de interés
+# Total de registros
+n_total <- nrow(combustibles)
+
+# Cantidad de registros correspondientes a SHELL C.A.P.S.A.
+n_shell <- combustibles %>%
+  filter(empresabandera == "SHELL C.A.P.S.A.") %>%
+  nrow()
+
+# Proporción observada
+prop_shell <- n_shell / n_total
+
+n_total
+n_shell
+prop_shell
+
+
+# Intervalo de confianza del 95% para la proporción de SHELL C.A.P.S.A.
+ic_shell <- prop.test(
+  x = n_shell,
+  n = n_total,
+  conf.level = 0.95,
+  correct = FALSE
+)
+
+ic_shell
+
+
+# Extraer el intervalo de confianza
+ic_shell$conf.int
+
+# Pasar a porcentaje
+ic_shell_porcentaje <- ic_shell$conf.int * 100
+
+ic_shell_porcentaje
+
+# Gráfico de proporción de registros por bandera comercial
+ggplot(tabla_bandera, aes(x = reorder(empresabandera, porcentaje), y = porcentaje)) +
+  geom_col() +
+  coord_flip() +
+  labs(
+    title = "Porcentaje de registros por bandera comercial",
+    x = "Bandera comercial",
+    y = "Porcentaje de registros"
+  )

@@ -234,16 +234,73 @@ ggplot(combustibles, aes(x = anio, y = precio)) +
   labs(title = "Relación entre año y precio", x = "Año", y = "Precio")
 
 
-# 7. COMPARACIÓN DE GRUPOS / PRUEBAS DE HIPÓTESIS
 
-# Comparación del precio según producto
-modelo_anova <- aov(precio ~ producto, data = combustibles)
+# 7. COMPARACIÓN DE GRUPOS / PRUEBA DE HIPÓTESIS
 
-summary(modelo_anova)
 
-TukeyHSD(modelo_anova)
+# Se comparan dos grupos independientes:
+# Nafta súper entre 92 y 95 Ron vs Nafta premium de más de 95 Ron
 
-kruskal.test(precio ~ producto, data = combustibles)
+datos_naftas <- combustibles %>%
+  filter(producto %in% c(
+    "Nafta súper entre 92 y 95 Ron",
+    "Nafta premium de más de 95 Ron"
+  ))
+
+# Tabla descriptiva de los dos grupos
+resumen_naftas <- datos_naftas %>%
+  group_by(producto) %>%
+  summarise(
+    cantidad = n(),
+    media = round(mean(precio, na.rm = TRUE), 2),
+    mediana = round(median(precio, na.rm = TRUE), 2),
+    desvio = round(sd(precio, na.rm = TRUE), 2),
+    minimo = min(precio, na.rm = TRUE),
+    maximo = max(precio, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+resumen_naftas
+
+# Gráfico comparativo
+ggplot(datos_naftas, aes(x = producto, y = precio)) +
+  geom_boxplot() +
+  coord_flip() +
+  labs(
+    title = "Comparación de precios entre Nafta súper y Nafta premium",
+    x = "Producto",
+    y = "Precio"
+  )
+
+# Diagnóstico de normalidad por grupo
+# Se utiliza Shapiro-Wilk, aunque con muestras grandes puede ser muy sensible.
+by(datos_naftas$precio, datos_naftas$producto, shapiro.test)
+
+# QQ plot para observar normalidad de forma gráfica
+ggplot(datos_naftas, aes(sample = precio)) +
+  stat_qq() +
+  stat_qq_line() +
+  facet_wrap(~ producto) +
+  labs(
+    title = "QQ plot del precio por tipo de nafta"
+  )
+
+# Diagnóstico de igualdad de varianzas
+# Como las varianzas pueden ser distintas o dudosas, se usa Welch.
+var.test(precio ~ producto, data = datos_naftas)
+
+# Prueba t de Welch
+# H0: las medias de precio son iguales entre ambos productos.
+# H1: las medias de precio son diferentes.
+
+prueba_welch_naftas <- t.test(
+  precio ~ producto,
+  data = datos_naftas,
+  var.equal = FALSE,
+  conf.level = 0.95
+)
+
+prueba_welch_naftas
 
 
 # 8. MODELOS LINEALES

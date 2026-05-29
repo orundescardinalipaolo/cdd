@@ -346,27 +346,83 @@ La relación entre año y precio permite analizar si los precios tienden a aumen
 
 # Comparación de grupos y pruebas de hipótesis
 
-Para comparar grupos se analiza si existen diferencias en el precio según el tipo de producto.
+Para la comparación de grupos se seleccionaron dos productos comparables dentro del dataset: **Nafta (súper) entre 92 y 95 Ron** y **Nafta (premium) de más de 95 Ron**. La variable cuantitativa analizada fue el `precio`, mientras que la variable de agrupamiento fue el `producto`.
 
-Hipótesis nula: el precio promedio es igual para todos los productos.
+Como se comparan dos grupos independientes y no se asume igualdad de varianzas, se utiliza la **prueba t de Welch**. Esta prueba fue vista en clase y resulta adecuada cuando se desea comparar las medias de una variable cuantitativa entre dos grupos independientes con varianzas distintas o dudosas.
 
-Hipótesis alternativa: al menos un producto presenta un precio promedio diferente.
+Se plantean las siguientes hipótesis:
 
-```{r anova}
-modelo_anova <- aov(precio ~ producto, data = combustibles)
+- **Hipótesis nula:** el precio promedio de la Nafta (súper) es igual al precio promedio de la Nafta (premium).
+- **Hipótesis alternativa:** el precio promedio de la Nafta (súper) es diferente al precio promedio de la Nafta (premium).
 
-summary(modelo_anova)
+```{r comparacion-grupos-welch}
+datos_naftas <- combustibles %>%
+  filter(producto %in% c(
+    "Nafta (súper) entre 92 y 95 Ron",
+    "Nafta (premium) de más de 95 Ron"
+  )) %>%
+  droplevels()
 
-TukeyHSD(modelo_anova)
+# Se verifica que quedaron exactamente dos grupos
+levels(datos_naftas$producto)
+
+resumen_naftas <- datos_naftas %>%
+  group_by(producto) %>%
+  summarise(
+    cantidad = n(),
+    media = round(mean(precio, na.rm = TRUE), 2),
+    mediana = round(median(precio, na.rm = TRUE), 2),
+    desvio = round(sd(precio, na.rm = TRUE), 2),
+    minimo = min(precio, na.rm = TRUE),
+    maximo = max(precio, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+resumen_naftas
 ```
 
-Como complemento se utiliza la prueba no paramétrica de Kruskal-Wallis, ya que la variable precio puede presentar asimetría y valores extremos.
-
-```{r kruskal}
-kruskal.test(precio ~ producto, data = combustibles)
+```{r grafico-comparacion-naftas}
+ggplot(datos_naftas, aes(x = producto, y = precio)) +
+  geom_boxplot() +
+  coord_flip() +
+  labs(
+    title = "Comparación de precios entre Nafta (súper) y Nafta (premium)",
+    x = "Producto",
+    y = "Precio"
+  )
 ```
 
-Si el valor p es menor a 0,05, se concluye que existen diferencias estadísticamente significativas en el precio según el producto. Esta conclusión permite sostener que los combustibles no presentan el mismo comportamiento de precios.
+Antes de aplicar la prueba se realiza una revisión de normalidad mediante Shapiro-Wilk y QQ plot. También se compara la dispersión entre ambos grupos mediante una prueba F de igualdad de varianzas.
+
+```{r diagnosticos-naftas}
+by(datos_naftas$precio, datos_naftas$producto, shapiro.test)
+
+# Prueba F para comparar varianzas entre los dos grupos
+var.test(precio ~ producto, data = datos_naftas)
+```
+
+```{r qqplot-naftas}
+ggplot(datos_naftas, aes(sample = precio)) +
+  stat_qq() +
+  stat_qq_line() +
+  facet_wrap(~ producto) +
+  labs(title = "QQ plot del precio por tipo de nafta")
+```
+
+Luego se aplica la prueba t de Welch.
+
+```{r prueba-welch-naftas}
+prueba_welch_naftas <- t.test(
+  precio ~ producto,
+  data = datos_naftas,
+  var.equal = FALSE,
+  conf.level = 0.95
+)
+
+prueba_welch_naftas
+```
+
+Si el valor p obtenido es menor a 0,05, se rechaza la hipótesis nula y se concluye que existen diferencias estadísticamente significativas entre los precios promedio de ambos tipos de nafta. Si el valor p es mayor o igual a 0,05, no se rechaza la hipótesis nula y no se cuenta con evidencia suficiente para afirmar que los promedios sean diferentes.
 
 # Modelos lineales
 
@@ -378,8 +434,6 @@ modelo_2 <- lm(precio ~ anio + producto, data = combustibles)
 
 summary(modelo_1)
 summary(modelo_2)
-
-anova(modelo_1, modelo_2)
 ```
 
 ```{r metricas-modelos}
@@ -559,7 +613,7 @@ Los intervalos de confianza permitieron estimar proporciones para variables cual
 
 El análisis de asociación mostró la relación entre el tipo de producto y la bandera comercial, mientras que las correlaciones entre año y precio permitieron observar una tendencia creciente de los precios nominales a lo largo del tiempo.
 
-La comparación de grupos mediante ANOVA y Kruskal-Wallis permitió evaluar si existen diferencias significativas de precio entre productos. Los modelos lineales permitieron explicar parte de la variabilidad del precio a partir del año y del tipo de producto.
+La comparación de grupos se realizó mediante una prueba t de Welch para dos grupos independientes, comparando los precios de Nafta (súper) y Nafta (premium). Esta prueba fue seleccionada porque la variable `precio` es cuantitativa, los grupos comparados son independientes y no se asumió igualdad de varianzas. Los modelos lineales permitieron explicar parte de la variabilidad del precio a partir del año y del tipo de producto.
 
 El análisis de outliers permitió detectar registros con valores atípicos en precio y en coordenadas geográficas. Estos casos deben interpretarse con cautela y podrían requerir revisión.
 

@@ -357,3 +357,6 @@ ggplot(precio_producto_anio, aes(x = anio, y = precio_promedio, group = producto
     y = "Precio promedio"
   ) +
   facet_wrap(~ producto)
+
+# Ejercicio: Construcción e interpretación de intervalos de confianza para variables cualitativas, considerar alguna 
+# categoría de interés y desde allí la construcción.

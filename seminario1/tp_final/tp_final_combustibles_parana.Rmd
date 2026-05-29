@@ -1,0 +1,558 @@
+---
+title: "Trabajo Práctico Final"
+subtitle: "Precios históricos de combustibles en Paraná"
+author: "Pamela Bonadeo - Orundés Cardinali Paolo"
+date: "Mayo 2026"
+output:
+  pdf_document:
+    toc: true
+    toc_depth: 2
+    number_sections: true
+    latex_engine: xelatex
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  fig.width = 8,
+  fig.height = 5
+)
+```
+
+# Introducción
+
+El presente trabajo se realiza en el marco del Seminario 1: Técnicas de Análisis para la Ciencia de Datos, correspondiente a la Maestría en Ciencia de Datos de la FCyT - UADER.
+
+El dataset seleccionado contiene precios históricos de combustibles correspondientes a la ciudad de Paraná. La base incluye información sobre empresas expendedoras, productos, precios, fechas de vigencia, banderas comerciales y coordenadas geográficas.
+
+El objetivo general del trabajo es analizar la evolución histórica de los precios de combustibles en Paraná, identificar diferencias entre productos y banderas comerciales, detectar posibles valores atípicos y construir modelos estadísticos simples que permitan explicar el comportamiento del precio.
+
+# Carga de paquetes y datos
+
+```{r paquetes}
+library(tidyverse)
+library(lubridate)
+library(janitor)
+library(skimr)
+library(vcd)
+library(factoextra)
+```
+
+```{r carga-datos}
+combustibles <- read_delim(
+  "data-set-precios-historicos-combustibles-parana.csv",
+  delim = ";",
+  locale = locale(encoding = "Latin1"),
+  show_col_types = FALSE
+)
+```
+
+```{r preparacion-datos}
+combustibles <- combustibles %>%
+  mutate(
+    empresa = as.factor(empresa),
+    producto = as.factor(producto),
+    empresabandera = as.factor(empresabandera),
+    fecha = dmy_hm(fecha_vigencia),
+    anio = as.integer(anio),
+    mes = as.integer(mes),
+    mes_nombre = month(fecha, label = TRUE, abbr = FALSE),
+    latitud_num = as.numeric(gsub("\\.", "", latitud)) / 100000,
+    longitud_num = as.numeric(gsub("\\.", "", longitud)) / 100000
+  )
+```
+
+# Presentación de la base de datos
+
+La base de datos utilizada contiene registros de precios de combustibles en Paraná. Cada fila representa un registro de precio asociado a una empresa, un producto, una fecha de vigencia y una bandera comercial.
+
+```{r revision-inicial}
+head(combustibles)
+str(combustibles)
+dim(combustibles)
+summary(combustibles)
+```
+
+La dimensión del problema está dada por la cantidad de registros, la cantidad de variables disponibles y el período temporal cubierto por el dataset. En este caso, la base permite analizar la evolución de precios de distintos combustibles a lo largo de varios años.
+
+# Descripción de variables
+
+Las principales variables del dataset son:
+
+| Variable | Descripción | Tipo |
+|---|---|---|
+| empresa | Empresa expendedora | Cualitativa nominal |
+| producto | Tipo de combustible | Cualitativa nominal |
+| precio | Precio registrado | Cuantitativa continua |
+| fecha_vigencia | Fecha de vigencia del precio | Temporal |
+| empresabandera | Bandera comercial | Cualitativa nominal |
+| latitud | Latitud de la estación | Cuantitativa geográfica |
+| longitud | Longitud de la estación | Cuantitativa geográfica |
+| anio | Año del registro | Temporal / discreta |
+| mes | Mes del registro | Temporal / discreta |
+
+# Análisis de datos faltantes
+
+Se analiza la presencia de valores faltantes por variable y en el total del dataset.
+
+```{r faltantes}
+faltantes_por_variable <- combustibles %>%
+  summarise(across(everything(), ~ sum(is.na(.)))) %>%
+  pivot_longer(
+    cols = everything(),
+    names_to = "variable",
+    values_to = "cantidad_faltantes"
+  ) %>%
+  mutate(
+    porcentaje_faltantes = round(cantidad_faltantes / nrow(combustibles) * 100, 2)
+  )
+
+faltantes_por_variable
+sum(is.na(combustibles))
+```
+
+En función del resultado obtenido, no se observan problemas relevantes de datos faltantes en las variables principales del dataset. Esto permite avanzar con el análisis descriptivo y estadístico sin necesidad de aplicar métodos de imputación.
+
+# Análisis univariado
+
+El análisis univariado permite estudiar cada variable de manera individual. Para las variables cualitativas se construyen tablas de frecuencia y gráficos de barras. Para la variable cuantitativa principal, `precio`, se calculan medidas descriptivas y gráficos de distribución.
+
+```{r tablas-univariadas}
+tabla_producto <- combustibles %>%
+  count(producto, sort = TRUE) %>%
+  mutate(porcentaje = round(n / sum(n) * 100, 2))
+
+tabla_bandera <- combustibles %>%
+  count(empresabandera, sort = TRUE) %>%
+  mutate(porcentaje = round(n / sum(n) * 100, 2))
+
+tabla_empresa <- combustibles %>%
+  count(empresa, sort = TRUE) %>%
+  mutate(porcentaje = round(n / sum(n) * 100, 2))
+
+tabla_anio <- combustibles %>%
+  count(anio) %>%
+  mutate(porcentaje = round(n / sum(n) * 100, 2))
+
+tabla_producto
+tabla_bandera
+tabla_empresa
+tabla_anio
+```
+
+```{r resumen-precio}
+resumen_precio <- combustibles %>%
+  summarise(
+    cantidad = n(),
+    minimo = min(precio, na.rm = TRUE),
+    q1 = quantile(precio, 0.25, na.rm = TRUE),
+    media = mean(precio, na.rm = TRUE),
+    mediana = median(precio, na.rm = TRUE),
+    q3 = quantile(precio, 0.75, na.rm = TRUE),
+    maximo = max(precio, na.rm = TRUE),
+    desvio = sd(precio, na.rm = TRUE)
+  )
+
+resumen_precio
+```
+
+```{r resumen-precio-producto}
+resumen_precio_producto <- combustibles %>%
+  group_by(producto) %>%
+  summarise(
+    cantidad = n(),
+    media = round(mean(precio, na.rm = TRUE), 2),
+    mediana = round(median(precio, na.rm = TRUE), 2),
+    desvio = round(sd(precio, na.rm = TRUE), 2),
+    minimo = min(precio, na.rm = TRUE),
+    maximo = max(precio, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+resumen_precio_producto
+```
+
+```{r grafico-producto}
+ggplot(tabla_producto, aes(x = reorder(producto, n), y = n)) +
+  geom_col() +
+  coord_flip() +
+  labs(title = "Cantidad de registros por producto", x = "Producto", y = "Cantidad")
+```
+
+```{r grafico-bandera}
+ggplot(tabla_bandera, aes(x = reorder(empresabandera, n), y = n)) +
+  geom_col() +
+  coord_flip() +
+  labs(title = "Cantidad de registros por bandera", x = "Bandera", y = "Cantidad")
+```
+
+```{r histograma-precio}
+ggplot(combustibles, aes(x = precio)) +
+  geom_histogram(bins = 30) +
+  labs(title = "Distribución de precios", x = "Precio", y = "Frecuencia")
+```
+
+```{r boxplot-producto}
+ggplot(combustibles, aes(x = producto, y = precio)) +
+  geom_boxplot() +
+  coord_flip() +
+  labs(title = "Precio según producto", x = "Producto", y = "Precio")
+```
+
+```{r evolucion-anual}
+precio_anio <- combustibles %>%
+  group_by(anio) %>%
+  summarise(
+    precio_promedio = mean(precio, na.rm = TRUE),
+    precio_mediano = median(precio, na.rm = TRUE),
+    cantidad = n(),
+    .groups = "drop"
+  )
+
+precio_anio
+
+ggplot(precio_anio, aes(x = anio, y = precio_promedio)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "Evolución del precio promedio por año", x = "Año", y = "Precio promedio")
+```
+
+El análisis univariado muestra la distribución de registros por producto, empresa, bandera comercial y año. Además, permite observar que la variable precio presenta dispersión, lo cual es esperable porque el dataset contiene diferentes tipos de combustibles y un período temporal amplio.
+
+# Intervalo de confianza para variable cualitativa
+
+Para el análisis de una variable cualitativa se selecciona la variable `empresabandera` y se toma como categoría de interés `SHELL C.A.P.S.A.`. El objetivo es estimar la proporción de registros del dataset que corresponden a esa bandera comercial.
+
+```{r ic-cualitativa}
+n_total <- nrow(combustibles)
+
+n_shell <- combustibles %>%
+  filter(empresabandera == "SHELL C.A.P.S.A.") %>%
+  nrow()
+
+ic_shell <- prop.test(
+  x = n_shell,
+  n = n_total,
+  conf.level = 0.95,
+  correct = FALSE
+)
+
+ic_shell
+
+tabla_ic_shell <- tibble(
+  variable = "empresabandera",
+  categoria = "SHELL C.A.P.S.A.",
+  total = n_total,
+  cantidad_categoria = n_shell,
+  porcentaje = round(n_shell / n_total * 100, 2),
+  limite_inferior = round(ic_shell$conf.int[1] * 100, 2),
+  limite_superior = round(ic_shell$conf.int[2] * 100, 2)
+)
+
+tabla_ic_shell
+```
+
+El intervalo de confianza permite estimar, con un 95% de confianza, entre qué valores se encuentra la proporción de registros correspondientes a SHELL C.A.P.S.A. Esta interpretación debe limitarse al dataset analizado, ya que la base contiene registros de precios y no información sobre ventas o participación real de mercado.
+
+# Intervalo de confianza para variable cuantitativa
+
+Para la variable cuantitativa se selecciona `precio`, ya que es la variable numérica central del trabajo. Se construye un intervalo de confianza del 95% para la media general del precio.
+
+```{r ic-cuantitativa}
+ic_precio <- t.test(combustibles$precio, conf.level = 0.95)
+
+ic_precio
+
+tabla_ic_precio <- tibble(
+  variable = "precio",
+  media = round(mean(combustibles$precio, na.rm = TRUE), 2),
+  desvio = round(sd(combustibles$precio, na.rm = TRUE), 2),
+  limite_inferior = round(ic_precio$conf.int[1], 2),
+  limite_superior = round(ic_precio$conf.int[2], 2)
+)
+
+tabla_ic_precio
+```
+
+También se calculan intervalos de confianza para la media del precio según producto.
+
+```{r ic-producto}
+ic_precio_producto <- combustibles %>%
+  group_by(producto) %>%
+  summarise(
+    n = n(),
+    media = mean(precio, na.rm = TRUE),
+    desvio = sd(precio, na.rm = TRUE),
+    error = desvio / sqrt(n),
+    li = media - qt(0.975, n - 1) * error,
+    ls = media + qt(0.975, n - 1) * error,
+    .groups = "drop"
+  ) %>%
+  mutate(across(where(is.numeric), ~ round(.x, 2)))
+
+ic_precio_producto
+```
+
+El intervalo de confianza para la media del precio permite complementar el valor promedio observado con una medida de incertidumbre. Dado que los precios corresponden a distintos productos y años, resulta útil presentar también intervalos por producto.
+
+# Análisis de asociación
+
+Se analiza la asociación entre las variables `producto` y `empresabandera`, ambas cualitativas. Para ello se utiliza una tabla de contingencia y una prueba de Chi-cuadrado.
+
+```{r asociacion-cualitativa}
+tabla_producto_bandera <- table(combustibles$producto, combustibles$empresabandera)
+
+tabla_producto_bandera
+
+chisq.test(tabla_producto_bandera, simulate.p.value = TRUE)
+
+assocstats(tabla_producto_bandera)
+```
+
+La hipótesis nula plantea que no existe asociación entre el tipo de producto y la bandera comercial. Si el valor p es menor a 0,05, se rechaza la hipótesis nula y se concluye que existe asociación estadísticamente significativa entre ambas variables.
+
+También se analiza la relación entre el año y el precio mediante correlaciones de Pearson y Spearman.
+
+```{r correlaciones}
+cor.test(combustibles$anio, combustibles$precio, method = "pearson")
+cor.test(combustibles$anio, combustibles$precio, method = "spearman")
+```
+
+```{r grafico-correlacion}
+ggplot(combustibles, aes(x = anio, y = precio)) +
+  geom_point(alpha = 0.4) +
+  geom_smooth(method = "lm") +
+  labs(title = "Relación entre año y precio", x = "Año", y = "Precio")
+```
+
+La relación entre año y precio permite analizar si los precios tienden a aumentar a medida que avanza el tiempo. Dado que se trabaja con precios nominales, se espera una relación positiva.
+
+# Comparación de grupos y pruebas de hipótesis
+
+Para comparar grupos se analiza si existen diferencias en el precio según el tipo de producto.
+
+Hipótesis nula: el precio promedio es igual para todos los productos.
+
+Hipótesis alternativa: al menos un producto presenta un precio promedio diferente.
+
+```{r anova}
+modelo_anova <- aov(precio ~ producto, data = combustibles)
+
+summary(modelo_anova)
+
+TukeyHSD(modelo_anova)
+```
+
+Como complemento se utiliza la prueba no paramétrica de Kruskal-Wallis, ya que la variable precio puede presentar asimetría y valores extremos.
+
+```{r kruskal}
+kruskal.test(precio ~ producto, data = combustibles)
+```
+
+Si el valor p es menor a 0,05, se concluye que existen diferencias estadísticamente significativas en el precio según el producto. Esta conclusión permite sostener que los combustibles no presentan el mismo comportamiento de precios.
+
+# Modelos lineales
+
+Se construyen modelos lineales tomando como variable dependiente el `precio`. Como variables explicativas se utilizan `anio` y `producto`.
+
+```{r modelos-lineales}
+modelo_1 <- lm(precio ~ anio, data = combustibles)
+modelo_2 <- lm(precio ~ anio + producto, data = combustibles)
+
+summary(modelo_1)
+summary(modelo_2)
+
+anova(modelo_1, modelo_2)
+```
+
+```{r metricas-modelos}
+metricas <- tibble(
+  modelo = c("precio ~ anio", "precio ~ anio + producto"),
+  r2 = c(summary(modelo_1)$r.squared, summary(modelo_2)$r.squared),
+  r2_ajustado = c(summary(modelo_1)$adj.r.squared, summary(modelo_2)$adj.r.squared),
+  rmse = c(
+    sqrt(mean(residuals(modelo_1)^2)),
+    sqrt(mean(residuals(modelo_2)^2))
+  )
+) %>%
+  mutate(across(where(is.numeric), ~ round(.x, 4)))
+
+metricas
+```
+
+```{r grafico-modelo}
+combustibles_modelo <- combustibles %>%
+  mutate(
+    precio_estimado = predict(modelo_2),
+    residuo = precio - precio_estimado
+  )
+
+ggplot(combustibles_modelo, aes(x = precio_estimado, y = precio)) +
+  geom_point(alpha = 0.4) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed") +
+  labs(title = "Precio observado vs precio estimado", x = "Precio estimado", y = "Precio observado")
+```
+
+El modelo que incorpora `anio` y `producto` permite explicar mejor el precio que el modelo que utiliza solamente el año. Sin embargo, se trata de un modelo exploratorio, ya que no incorpora otras variables relevantes como inflación, impuestos, tipo de cambio o costos logísticos.
+
+# Identificación de outliers
+
+Para detectar valores atípicos se utiliza el método del rango intercuartílico. Se considera outlier a un valor ubicado por debajo de `Q1 - 1,5 * IQR` o por encima de `Q3 + 1,5 * IQR`.
+
+```{r funcion-outliers}
+es_outlier <- function(x) {
+  q1 <- quantile(x, 0.25, na.rm = TRUE)
+  q3 <- quantile(x, 0.75, na.rm = TRUE)
+  iqr <- IQR(x, na.rm = TRUE)
+  x < q1 - 1.5 * iqr | x > q3 + 1.5 * iqr
+}
+```
+
+```{r outliers-precio}
+combustibles_outliers <- combustibles %>%
+  mutate(outlier_precio = es_outlier(precio))
+
+outliers_precio <- combustibles_outliers %>%
+  filter(outlier_precio) %>%
+  select(empresa, producto, precio, fecha_vigencia, empresabandera, anio, mes)
+
+outliers_precio
+nrow(outliers_precio)
+```
+
+```{r outliers-varias}
+combustibles_outliers <- combustibles %>%
+  mutate(
+    outlier_precio = es_outlier(precio),
+    outlier_anio = es_outlier(anio),
+    outlier_mes = es_outlier(mes),
+    outlier_latitud = es_outlier(latitud_num),
+    outlier_longitud = es_outlier(longitud_num),
+    total_outliers = outlier_precio + outlier_anio + outlier_mes +
+      outlier_latitud + outlier_longitud
+  )
+
+tabla_outliers <- tibble(
+  variable = c("precio", "anio", "mes", "latitud", "longitud"),
+  cantidad = c(
+    sum(combustibles_outliers$outlier_precio),
+    sum(combustibles_outliers$outlier_anio),
+    sum(combustibles_outliers$outlier_mes),
+    sum(combustibles_outliers$outlier_latitud),
+    sum(combustibles_outliers$outlier_longitud)
+  )
+)
+
+tabla_outliers
+
+filas_con_outliers <- combustibles_outliers %>%
+  filter(total_outliers > 0) %>%
+  select(
+    empresa, producto, precio, fecha_vigencia, empresabandera,
+    anio, mes, latitud_num, longitud_num, total_outliers
+  )
+
+filas_con_outliers
+nrow(filas_con_outliers)
+```
+
+Este análisis permite identificar registros que podrían requerir revisión. Los outliers pueden representar errores de carga, situaciones excepcionales o valores reales poco frecuentes.
+
+# Reducción de dimensión: PCA
+
+Para reducir la dimensión de un conjunto de variables cuantitativas se aplica un Análisis de Componentes Principales. Se utilizan las variables `precio`, `anio`, `mes`, `latitud_num` y `longitud_num`.
+
+```{r pca}
+datos_pca <- combustibles %>%
+  select(precio, anio, mes, latitud_num, longitud_num) %>%
+  drop_na()
+
+pca <- prcomp(datos_pca, center = TRUE, scale. = TRUE)
+
+summary(pca)
+```
+
+```{r pca-graficos}
+fviz_eig(pca, addlabels = TRUE)
+
+fviz_pca_biplot(
+  pca,
+  repel = TRUE,
+  title = "Biplot del PCA"
+)
+```
+
+El PCA permite resumir la información de varias variables numéricas en una menor cantidad de componentes. El biplot permite observar la relación entre variables y registros, identificando posibles agrupamientos o direcciones de mayor variabilidad.
+
+# Aporte personal
+
+Como aporte adicional se analiza la evolución mensual del precio promedio por producto y la variación porcentual interanual. Esto permite observar la dinámica temporal con mayor detalle.
+
+```{r evolucion-mensual}
+precio_mensual <- combustibles %>%
+  group_by(anio, mes, producto) %>%
+  summarise(
+    precio_promedio = mean(precio, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  mutate(fecha_mes = ymd(paste(anio, mes, "01", sep = "-")))
+
+precio_mensual
+
+ggplot(precio_mensual, aes(x = fecha_mes, y = precio_promedio)) +
+  geom_line() +
+  facet_wrap(~ producto, scales = "free_y") +
+  labs(title = "Evolución mensual del precio promedio", x = "Fecha", y = "Precio promedio")
+```
+
+```{r variacion-interanual}
+precio_anual_producto <- combustibles %>%
+  group_by(anio, producto) %>%
+  summarise(
+    precio_promedio = mean(precio, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  arrange(producto, anio) %>%
+  group_by(producto) %>%
+  mutate(
+    variacion_interanual = (precio_promedio - lag(precio_promedio)) /
+      lag(precio_promedio) * 100
+  ) %>%
+  ungroup() %>%
+  mutate(across(where(is.numeric), ~ round(.x, 2)))
+
+precio_anual_producto
+
+ggplot(precio_anual_producto, aes(x = anio, y = variacion_interanual)) +
+  geom_line() +
+  geom_point() +
+  facet_wrap(~ producto) +
+  labs(title = "Variación interanual del precio promedio", x = "Año", y = "Variación interanual (%)")
+```
+
+Este análisis complementario permite estudiar no solo el nivel promedio de precios, sino también su variación a lo largo del tiempo. Como mejora futura, sería conveniente ajustar los precios por inflación para analizar precios reales.
+
+# Conclusión general
+
+El trabajo permitió analizar una base de datos de precios históricos de combustibles en Paraná correspondiente al período 2017-2026. La base contiene información sobre productos, empresas, banderas comerciales, precios, fechas de vigencia y ubicación geográfica.
+
+El análisis descriptivo permitió conocer la estructura general del dataset, la distribución de registros por producto, empresa, bandera comercial y año, así como el comportamiento general de la variable precio. No se detectaron problemas relevantes de datos faltantes.
+
+Los intervalos de confianza permitieron estimar proporciones para variables cualitativas y medias para variables cuantitativas. En particular, se analizó la proporción de registros correspondientes a SHELL C.A.P.S.A. y la media del precio, tanto de manera general como por producto.
+
+El análisis de asociación mostró la relación entre el tipo de producto y la bandera comercial, mientras que las correlaciones entre año y precio permitieron observar una tendencia creciente de los precios nominales a lo largo del tiempo.
+
+La comparación de grupos mediante ANOVA y Kruskal-Wallis permitió evaluar si existen diferencias significativas de precio entre productos. Los modelos lineales permitieron explicar parte de la variabilidad del precio a partir del año y del tipo de producto.
+
+El análisis de outliers permitió detectar registros con valores atípicos en precio y en coordenadas geográficas. Estos casos deben interpretarse con cautela y podrían requerir revisión.
+
+Finalmente, el análisis de componentes principales permitió reducir parcialmente la dimensión de las variables cuantitativas, mientras que el aporte personal permitió observar la evolución mensual y la variación interanual del precio promedio por producto.
+
+En síntesis, el dataset muestra una tendencia creciente de los precios nominales de combustibles en Paraná, diferencias relevantes entre productos y asociaciones entre variables comerciales. Como líneas futuras de análisis se recomienda ajustar los precios por inflación, incorporar nuevas variables explicativas y profundizar el análisis predictivo.
+
+# Referencia del dataset
+
+Fuente del dataset: Datos Abiertos de Energía de la República Argentina. Dataset de precios históricos de combustibles.
+

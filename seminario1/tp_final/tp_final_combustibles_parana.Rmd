@@ -1,25 +1,40 @@
 ---
-title: "Trabajo Práctico Final"
-subtitle: "Precios históricos de combustibles en Paraná"
-author: "Pamela Bonadeo - Orundés Cardinali Paolo"
-date: "Mayo 2026"
+title: ""
+author: ""
+date: ""
 output:
   pdf_document:
-    toc: true
-    toc_depth: 2
     number_sections: true
-    latex_engine: xelatex
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(
-  echo = TRUE,
-  warning = FALSE,
-  message = FALSE,
-  fig.width = 8,
-  fig.height = 5
-)
-```
+\begin{titlepage}
+\centering
+
+{\Large Universidad Autónoma de Entre Ríos \par}
+\vspace{0.2cm}
+
+{\Large Facultad de Ciencia y Tecnología \par}
+\vspace{0.2cm}
+
+{\Large Maestría en Ciencia de Datos \par}
+\vspace{2cm}
+
+{\Huge Trabajo Práctico Final \par}
+\vspace{0.5cm}
+
+{\Large Precios históricos de combustibles en Paraná \par}
+\vspace{2cm}
+
+{\large Pamela Bonadeo \par}
+{\large Orundés Cardinali Paolo \par}
+\vspace{1.5cm}
+
+{\large Mayo 2026 \par}
+
+\end{titlepage}
+
+\tableofcontents
+\newpage
 
 # Introducción
 
